@@ -222,6 +222,8 @@ for i in range(len(todosPeriodos)):
         plt.title(f'Avance de los estudiantes ingresados en {anio} para el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
         plt.legend(results[anio].keys())
         plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_{str(anio)}.png')
+        plt.cla()
+        plt.close()
 
     all_cohortes = {">3":0,"3-2":0,"2-1":0,"1-0":0,"0-1":0,"-1-2":0,"-2-3":0}
     for anio in results:
@@ -236,4 +238,51 @@ for i in range(len(todosPeriodos)):
     plt.title(f'Avance de todos los estudiantes en el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
     plt.legend(all_cohortes.keys())
     plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_all_cohortes.png')
+    plt.cla()
+    plt.close()
 
+results_dict = {}
+
+for i in range(len(pensum_courses)):
+    materia_df = solo_IBIO[solo_IBIO['Materia'] == pensum_courses[i]]
+    materia_df = materia_df.reset_index()
+    unique_periods = materia_df['Periodo'].unique()
+
+    pensum_course_dict = {}
+
+    for j in range(len(unique_periods)):
+        periodo_df = materia_df[materia_df['Periodo'] == unique_periods[j]]
+        periodo_df = periodo_df.reset_index()
+        n = len(periodo_df)
+        mean = periodo_df['Avance'].mean()
+        std_dev = periodo_df['Avance'].std()
+
+        pensum_course_dict[unique_periods[j]] = {'mean': mean, 'std_dev': std_dev, 'n':n}
+
+
+    results_dict[pensum_courses[i]] = pensum_course_dict
+
+directory = f"Results_new/Subject_Results"
+
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
+for i in range(len(pensum_courses)):
+
+    x = list(results_dict[pensum_courses[i]].keys())
+    x_list = [str(i) for i in x]
+    y = [results_dict[pensum_courses[i]][year]['mean'] for year in x]
+    y_err = [results_dict[pensum_courses[i]][year]['std_dev'] for year in x]
+    n = [results_dict[pensum_courses[i]][year]['n'] for year in x]
+
+    plt.errorbar(x_list, y, yerr=y_err, color='red', linewidth=0.8, fmt='o--', ecolor='black', capsize=7, elinewidth=1, markeredgewidth=1)
+    plt.xticks(x_list)
+    plt.xlabel('Semestre')
+    plt.ylabel('Avance Promedio')
+    
+    for y_n, y_val in enumerate(y):
+        plt.text(x_list[y_n], y_val + y_err[y_n] + 0.1, f'{n[y_n]}', ha='center')
+    plt.title(f'{pensum_courses[i]}{" "}{cursos[pensum_courses[i]][1]}')
+    plt.savefig(f'Results_new/Subject_Results/{pensum_courses[i]}.png')
+    plt.cla()
+    plt.close()
