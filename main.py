@@ -1,3 +1,4 @@
+#%% Importar librerias
 import pandas as pd
 import json
 import os
@@ -6,11 +7,12 @@ import numpy as np
 import matplotlib.patches as mpatches
 import matplotlib.ticker as ticker
 
+#%% Subir datos cursos obligatorios
 with open("cursos_obligatorios.json") as json_file:
     cursos = json.load(json_file)
 
 xlsx = pd.read_excel("Data/Cursos IBIO 2018-2023.xlsx")
-pensum_courses = cursos.keys()
+pensum_courses = list(cursos.keys())
 
 def assign_group(value):
     if value > 3:
@@ -68,8 +70,8 @@ def Semestre(row):
         
     elif semestreIngreso<semestreActual:
         return 2*(anioActual-anioIngreso)+2
-    
-directory = "/media/SSD3/jpuentes/IBIO_Dashboard/Results_new"
+       
+directory = "Results_new"
 
 if not os.path.exists(directory):
     os.makedirs(directory)
@@ -118,7 +120,20 @@ group_colors = {
     '< -3': 'darkgreen'
 }
 
-pensum_courses = list(pensum_courses)
+#%%
+
+#Todas las cohortes
+mean_dataframe=pd.DataFrame()
+desv_dataframe=pd.DataFrame()
+n_dataframe=pd.DataFrame()
+
+#Estudiantes sacionados
+sancionados_xlsx=pd.read_excel("Data/Estudiantes Sancionados 2021-10.xlsx")
+sancionados=list(sancionados_xlsx["CÓDIGO"])
+sancionados_dict={}
+mean_sancionados=pd.DataFrame()
+desv_sancionados=pd.DataFrame()
+n_sancionados=pd.DataFrame()
 
 for i in range(len(todosPeriodos)):
 
@@ -157,7 +172,7 @@ for i in range(len(todosPeriodos)):
         ax.set_title(f'{cursos[pensum_courses[j]][1]}{" "}{todosPeriodos[i]}{0}', fontsize=16)
         handles = [mpatches.Patch(color=color, label=label) for label, color in group_colors.items()]
         ax.legend(handles=handles, loc='upper right')
-        plt.savefig(f'{directory2}/piechart_{pensum_courses[j]}.png')
+        #plt.savefig(f'{directory2}/piechart_{pensum_courses[j]}.png')
         plt.cla()
         plt.close()
 
@@ -167,12 +182,15 @@ for i in range(len(todosPeriodos)):
     cohortes_dict=dict.fromkeys(semesters_per_cohorte)
     for cohorte in cohortes_dict:
         cohortes_dict[cohorte]={}
+        sancionados_dict[cohorte]={}
 
     students_per_cohorte=np.unique(df_cohorte['Código est'])
     for student in students_per_cohorte:
         semestre_ingreso=int(np.unique(df_cohorte[df_cohorte['Código est']==student]['Año Ingreso']))
         cohortes_dict[semestre_ingreso][student]=np.mean(df_cohorte[df_cohorte['Código est']==student]["Avance"])
-
+        if student in sancionados:
+            sancionados_dict[semestre_ingreso][student]=np.mean(df_cohorte[df_cohorte['Código est']==student]["Avance"])
+        
     results={}
 
     for cohorte in cohortes_dict:
@@ -203,6 +221,27 @@ for i in range(len(todosPeriodos)):
         for zero_key in zero_values:
             del results[cohorte][zero_key]
 
+    #Stadisticas cohorte
+    for periodo in cohortes_dict:
+        if periodo in todosPeriodos:
+            semestre_actual=i-list(todosPeriodos).index(periodo)
+            mean=np.mean(list(cohortes_dict[periodo].values()))
+            desv=np.std(list(cohortes_dict[periodo].values()))
+            n=len(list(cohortes_dict[periodo].values()))
+            mean_dataframe.loc[periodo,semestre_actual]=mean
+            desv_dataframe.loc[periodo,semestre_actual]=desv
+            n_dataframe.loc[periodo,semestre_actual]=n
+
+    for periodo in sancionados_dict:
+        if periodo in todosPeriodos:
+            semestre_actual=i-list(todosPeriodos).index(periodo)
+            mean=np.mean(list(sancionados_dict[periodo].values()))
+            desv=np.std(list(sancionados_dict[periodo].values()))
+            n=len(list(sancionados_dict[periodo].values()))
+            mean_sancionados.loc[periodo,semestre_actual]=mean
+            desv_sancionados.loc[periodo,semestre_actual]=desv
+            n_sancionados.loc[periodo,semestre_actual]=n
+
     group_colors_2 = {
     '>3': '#d3554c',
     '3-2': '#fc6c64',
@@ -221,7 +260,7 @@ for i in range(len(todosPeriodos)):
         plt.pie(results[anio].values(), autopct=lambda x: f'{int(round(x/100.0*sum(results[anio].values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(results[anio]))
         plt.title(f'Avance de los estudiantes ingresados en {anio} para el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
         plt.legend(results[anio].keys())
-        plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_{str(anio)}.png')
+        #plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_{str(anio)}.png')
         plt.cla()
         plt.close()
 
@@ -237,9 +276,72 @@ for i in range(len(todosPeriodos)):
     plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
     plt.title(f'Avance de todos los estudiantes en el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
     plt.legend(all_cohortes.keys())
-    plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_all_cohortes.png')
+    #plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_all_cohortes.png')
     plt.cla()
     plt.close()
+
+#%% Gráficas de media y desviación stándar para todas las cohortes
+
+directory = f"Results_new/Cohortes_Results"
+
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
+mean_semestres=[]
+
+#Promedio de avance por semestre
+for semestre in range(11):
+    datos=[mean_dataframe[semestre][x] for x in todosPeriodos if not np.isnan(mean_dataframe[semestre][x])]
+    mean_semestres.append(np.mean(datos))
+
+mean_semestres[0]=0
+
+for periodo in todosPeriodos:
+    plt.figure()
+    plt.title(f"Cohorte {periodo}",fontsize=18)
+    lim=sum([not np.isnan(n_dataframe.loc[periodo][x]) for x in range(11)])
+    x_list=range(lim)
+    y_list=mean_dataframe.loc[periodo][:lim]
+    y_err=desv_dataframe.loc[periodo][:lim]
+    n_list=n_dataframe.loc[periodo][:lim]
+    plt.plot(x_list,mean_semestres[:lim],'o--', label="Avance promedio histórico")
+    plt.errorbar(x_list, y_list, yerr=y_err, color='red', linewidth=0.8, fmt='o--', ecolor='black', capsize=7, elinewidth=1, markeredgewidth=1,label="Avance cohorte")
+    plt.xticks(x_list)
+    plt.xlabel('Semestre')
+    plt.ylabel('Avance Promedio')
+    plt.legend()
+    for y_n, y_val in enumerate(y_list):
+        plt.text(x_list[y_n], y_val + y_err[y_n]+0.01, f'{n_list[y_n]}', ha='center')
+    plt.savefig(f'{directory}/{periodo}.png')
+
+#%% Gráficas de media y desviación stándar para sancionados
+
+directory = f"Results_new/Sancionados_Results"
+
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
+periodos_sancionados=[20191,20192,20201]
+
+for periodo in periodos_sancionados:
+    plt.figure()
+    plt.title(f"Sancionados ingresados en {periodo}",fontsize=18)
+    lim=sum([not np.isnan(n_sancionados.loc[periodo][x]) for x in range(11)])
+    x_list=range(lim)
+    y_list=mean_sancionados.loc[periodo][:lim]
+    y_err=desv_sancionados.loc[periodo][:lim]
+    n_list=n_sancionados.loc[periodo][:lim]
+    plt.plot(x_list,mean_semestres[:lim],'o--', label="Avance promedio histórico")
+    plt.errorbar(x_list, y_list, yerr=y_err, color='red', linewidth=0.8, fmt='o--', ecolor='black', capsize=7, elinewidth=1, markeredgewidth=1,label="Avance cohorte")
+    plt.xticks(x_list)
+    plt.xlabel('Semestre')
+    plt.ylabel('Avance Promedio')
+    plt.legend()
+    for y_n, y_val in enumerate(y_list):
+        plt.text(x_list[y_n], y_val + y_err[y_n]+0.01, f'{n_list[y_n]}', ha='center')
+    plt.savefig(f'{directory}/{periodo}.png')
+
+#%% Estadísticas por materia
 
 results_dict = {}
 
@@ -258,7 +360,6 @@ for i in range(len(pensum_courses)):
         std_dev = periodo_df['Avance'].std()
 
         pensum_course_dict[unique_periods[j]] = {'mean': mean, 'std_dev': std_dev, 'n':n}
-
 
     results_dict[pensum_courses[i]] = pensum_course_dict
 
@@ -283,6 +384,7 @@ for i in range(len(pensum_courses)):
     for y_n, y_val in enumerate(y):
         plt.text(x_list[y_n], y_val + y_err[y_n] + 0.1, f'{n[y_n]}', ha='center')
     plt.title(f'{pensum_courses[i]}{" "}{cursos[pensum_courses[i]][1]}')
+    plt.show()
     plt.savefig(f'Results_new/Subject_Results/{pensum_courses[i]}.png')
     plt.cla()
     plt.close()
