@@ -197,7 +197,7 @@ for i in range(len(todosPeriodos)):
         semestre_ingreso=int(str(estudiante)[:5])
         cohortes_dict[semestre_ingreso][estudiante]=np.mean(df_periodo[df_periodo['Código est']==estudiante]["Avance"])
         if estudiante in sancionados:
-            sancionados_dict[semestre_ingreso][estudiante]=np.mean(df_periodo[df_periodo['Código est']==periodo]["Avance"])
+            sancionados_dict[semestre_ingreso][estudiante]=np.mean(df_periodo[df_periodo['Código est']==estudiante]["Avance"])
         
     results={}
 
@@ -239,7 +239,7 @@ for i in range(len(todosPeriodos)):
             n=len(list(cohortes_dict[periodo].values()))
             mean_dataframe.loc[periodo,semestre_actual]=mean
             desv_dataframe.loc[periodo,semestre_actual]=desv
-            n_dataframe.loc[periodo,semestre_actual]=n
+            #n_dataframe.loc[periodo,semestre_actual]=n
 
     for periodo in sancionados_dict:
         if periodo in todosPeriodos:
@@ -249,7 +249,7 @@ for i in range(len(todosPeriodos)):
             n=len(list(sancionados_dict[periodo].values()))
             mean_sancionados.loc[periodo,semestre_actual]=mean
             desv_sancionados.loc[periodo,semestre_actual]=desv
-            n_sancionados.loc[periodo,semestre_actual]=n
+            #n_sancionados.loc[periodo,semestre_actual]=n
 
     group_colors_2 = {
     '>3': '#d3554c',
@@ -289,6 +289,37 @@ for i in range(len(todosPeriodos)):
     plt.cla()
     plt.close()
 
+#%% Dataframe de todos los estudiantes IBIO 
+
+mask = xlsx['Programa principal'] == 'INGENIERIA BIOMEDICA'
+todos_IBIO = xlsx[mask]
+todos_IBIO = todos_IBIO.reset_index()
+todos_IBIO['Periodo'] = todos_IBIO['Periodo'].astype(str).str[:5].astype(int)
+todos_IBIO = todos_IBIO.drop('index', axis=1)
+todos_IBIO['Código est'] = todos_IBIO['Código est'].astype(int)
+todos_IBIO['Año Ingreso'] = todos_IBIO['Código est'].astype(str).str[:5].astype(int)
+
+#%% Número de estudiantes IBIO por semestre
+
+for i in range(len(todosPeriodos)):
+    condicion_periodo = todos_IBIO['Periodo']==todosPeriodos[i]
+    df_periodo=todos_IBIO[condicion_periodo]
+    estudiantes={}
+    for j in range(len(df_periodo)): 
+        if df_periodo.iloc[j]['Año Ingreso'] in todosPeriodos:
+            periodo = df_periodo.iloc[j]['Año Ingreso']
+            condicion_semestre=df_periodo['Año Ingreso']==periodo
+            df_estudiantes=df_periodo[condicion_semestre]
+            estudiantes_unicos=np.unique(df_estudiantes['Código est'])
+            n_estudiantes=len(estudiantes_unicos)
+            semestre_actual=i-list(todosPeriodos).index(periodo)
+            n_dataframe.loc[periodo,semestre_actual]=n_estudiantes
+            contador_sancionados=0
+            for codigo in estudiantes_unicos:
+                if codigo in sancionados:
+                    contador_sancionados+=1
+            n_sancionados.loc[periodo,semestre_actual]=contador_sancionados
+        
 #%% Estadísticas históricas por semestre 
 
 mean_avance_hist=[]
@@ -300,17 +331,18 @@ for semestre in range(11):
     mean_avance_hist.append(np.mean(avance))
     mean_n_hist.append(np.mean(n))
 
-#%% Gráficas de avance por cohortes
-
+#%% Path resultados de cohortes
 directory = f"Results_new/Cohortes_Results"
 
 if not os.path.exists(directory):
     os.makedirs(directory)
 
+#%% Gráficas de avance por cohortes
+
 for periodo in todosPeriodos:
     plt.figure(figsize=(10,7.5))
     lim=sum([not np.isnan(mean_dataframe.loc[periodo][x]) for x in range(11)])
-    x_list=range(lim)
+    x_list=range(1,lim+1)
     y_list=mean_dataframe.loc[periodo][:lim]
     y_err=desv_dataframe.loc[periodo][:lim]
     plt.plot(x_list, mean_avance_hist[:lim], 'o--', linewidth=0.8, label="Avance promedio histórico")
@@ -333,7 +365,7 @@ colors_list.append('#000000')
 
 for i in range(len(todosPeriodos)):
     lim=sum([not np.isnan(mean_dataframe.loc[todosPeriodos[i]][x]) for x in range(11)])
-    x_list=range(lim)
+    x_list=range(1,lim+1)
     y_list=mean_dataframe.loc[todosPeriodos[i]][:lim]
     plt.plot(x_list, y_list, 'o--', linewidth=0.8, label=todosPeriodos[i],color=colors_list[i])
     plt.axhline(y=0, color="black", linewidth=0.8, linestyle='--')
@@ -341,7 +373,7 @@ for i in range(len(todosPeriodos)):
 plt.xlabel('Semestre',fontsize=14)
 plt.ylabel('Avance Promedio',fontsize=14)
 plt.legend(fontsize=12, loc=2)
-plt.xticks(range(11))
+plt.xticks(range(1,12))
 plt.title(f"Avance promedio por cohorte",fontsize=18)
 plt.savefig(f'{directory}/cohortes_avance.png')
 
@@ -350,7 +382,7 @@ plt.savefig(f'{directory}/cohortes_avance.png')
 for periodo in todosPeriodos:
     plt.figure(figsize=(10,7.5))
     lim=sum([not np.isnan(n_dataframe.loc[periodo][x]) for x in range(11)])
-    x_list=range(lim)
+    x_list=range(1,lim+1)
     n_list=n_dataframe.loc[periodo][:lim]
     plt.plot(x_list, mean_n_hist[:lim], 'o--', linewidth=0.8, label="N histórico")
     plt.plot(x_list, n_list, 'o--', linewidth=0.8, label="N cohorte", color='red')
@@ -370,16 +402,54 @@ colors_list.append('#000000')
 
 for i in range(len(todosPeriodos)):
     lim=sum([not np.isnan(n_dataframe.loc[todosPeriodos[i]][x]) for x in range(11)])
-    x_list=range(lim)
+    x_list=range(1,lim+1)
     n_list=n_dataframe.loc[todosPeriodos[i]][:lim]
     plt.plot(x_list, n_list, 'o--', linewidth=0.8, label=todosPeriodos[i], color=colors_list[i])
     plt.ylim((0,90))
-plt.xticks(range(11))
+plt.xticks(range(1,12))
 plt.xlabel('Semestre',fontsize=14)
 plt.ylabel('Número de estudiantes',fontsize=14)
 plt.legend(fontsize=12, loc=1)
 plt.title(f"N por cohorte",fontsize=18)
 plt.savefig(f'{directory}/cohortes_n.png')
+
+#%% Sancionados
+
+mean_sancionados_list=[]
+desv_sancionados_list=[]
+n_sancionados_list=[]
+for i in range(9):
+    mean_sancionados_list.append(mean_sancionados[i].mean())
+    desv_sancionados_list.append(desv_sancionados[i].mean())
+    n_sancionados_list.append(n_sancionados[i].sum())
+
+#%% Gráfica de avance para sancionados
+
+plt.figure(figsize=(10,7.5))
+x_list=range(1,10)
+plt.axhline(y=0, color="black", linewidth=0.8, linestyle='--')
+plt.plot(x_list, mean_avance_hist[:9], 'o--', linewidth=0.8, label="Avance promedio histórico")
+plt.errorbar(x_list, mean_sancionados_list, yerr=desv_sancionados_list, color='red', linewidth=0.8, fmt='o--', ecolor='black', label="Avance promedio sancionados")
+plt.ylim((-1,5))
+plt.xticks(x_list)
+plt.xlabel('Semestre',fontsize=14)
+plt.ylabel('Avance Promedio',fontsize=14)
+plt.legend(fontsize=12, loc=2)
+avance_prom=np.round(np.mean(mean_sancionados_list),2)
+plt.title(f"Sancionados (AP={avance_prom})",fontsize=18)
+plt.savefig(f'{directory}/sancionados_avance.png')
+
+#%% Gráfica de N para sancionados
+
+plt.figure(figsize=(10,7.5))
+x_list=range(1,10)
+plt.plot(x_list, mean_n_hist[:9], 'o--', linewidth=0.8, label="N histórico")
+plt.plot(x_list, n_sancionados_list, 'o--', linewidth=0.8, label="Número de estudiantes", color="red")
+plt.xlabel('Semestre',fontsize=14)
+plt.ylabel('Número de estudiantes',fontsize=14)
+plt.title(f"Estudiantes sancionados",fontsize=18)
+plt.legend(fontsize=12, loc=3)
+plt.savefig(f'{directory}/sancionados_n.png')
 
 #%% Gráficas de estadísticas por materia
 
