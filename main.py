@@ -5,14 +5,8 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.patches as mpatches
-import matplotlib.ticker as ticker
 
-#%% Subir datos cursos obligatorios
-with open("cursos_obligatorios.json") as json_file:
-    cursos = json.load(json_file)
-
-xlsx = pd.read_excel("Data/Cursos IBIO 2018-2023.xlsx")
-pensum_courses = list(cursos.keys())
+#%% Funciones básicas
 
 def assign_group(value):
     if value > 3:
@@ -70,17 +64,19 @@ def Semestre(row):
         
     elif semestreIngreso<semestreActual:
         return 2*(anioActual-anioIngreso)+2
-       
-directory = "Results_new"
+    
+#%% Subir datos cursos obligatorios
 
-if not os.path.exists(directory):
-    os.makedirs(directory)
+with open("cursos_obligatorios.json") as json_file:
+    cursos = json.load(json_file)
 
-avances = []
+xlsx = pd.read_excel("Data/Cursos IBIO 2018-2023.xlsx")
+pensum_courses = list(cursos.keys())
+
+#%% Filtrar solo los estudiantes IBIO (primer programa)
 
 desired_program = 'INGENIERIA BIOMEDICA'
     
-#Keep only the students whose main programme is IBIO
 mask = xlsx['Programa principal'] == desired_program
 
 solo_IBIO = xlsx[mask]
@@ -120,20 +116,12 @@ group_colors = {
     '< -3': 'darkgreen'
 }
 
-#%%
+#%% Piecharts por materia
 
-#Todas las cohortes
-mean_dataframe=pd.DataFrame()
-desv_dataframe=pd.DataFrame()
-n_dataframe=pd.DataFrame()
+directory = "Results_new"
 
-#Estudiantes sacionados
-sancionados_xlsx=pd.read_excel("Data/Estudiantes Sancionados 2021-10.xlsx")
-sancionados=list(sancionados_xlsx["CÓDIGO"])
-sancionados_dict={}
-mean_sancionados=pd.DataFrame()
-desv_sancionados=pd.DataFrame()
-n_sancionados=pd.DataFrame()
+if not os.path.exists(directory):
+    os.makedirs(directory)
 
 for i in range(len(todosPeriodos)):
 
@@ -176,7 +164,25 @@ for i in range(len(todosPeriodos)):
         plt.cla()
         plt.close()
 
-    #cohortes
+#%% Crear dataframes para estadísticas de cohortes
+
+#Todas las cohortes
+mean_dataframe=pd.DataFrame()
+desv_dataframe=pd.DataFrame()
+n_dataframe=pd.DataFrame()
+
+#Estudiantes sacionados
+sancionados_xlsx=pd.read_excel("Data/Estudiantes Sancionados 2021-10.xlsx")
+sancionados=list(sancionados_xlsx["CÓDIGO"])
+sancionados_dict={}
+mean_sancionados=pd.DataFrame()
+desv_sancionados=pd.DataFrame()
+n_sancionados=pd.DataFrame()
+
+#%% Cohortes
+
+for i in range(len(todosPeriodos)):
+
     df_cohorte=solo_IBIO[condition_anio]
     semesters_per_cohorte=np.unique(df_cohorte['Año Ingreso'])
     cohortes_dict=dict.fromkeys(semesters_per_cohorte)
@@ -341,7 +347,7 @@ for periodo in periodos_sancionados:
         plt.text(x_list[y_n], y_val + y_err[y_n]+0.01, f'{n_list[y_n]}', ha='center')
     plt.savefig(f'{directory}/{periodo}.png')
 
-#%% Estadísticas por materia
+#%% Gráficas de estadísticas por materia
 
 results_dict = {}
 
