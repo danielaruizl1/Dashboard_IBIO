@@ -161,7 +161,7 @@ for i in range(len(todosPeriodos)):
         ax.set_title(f'{cursos[pensum_courses[j]][1]}{" "}{todosPeriodos[i]}{0}', fontsize=16)
         handles = [mpatches.Patch(color=color, label=label) for label, color in group_colors.items()]
         ax.legend(handles=handles, loc='upper right')
-        #plt.savefig(f'{directory2}/piechart_{pensum_courses[j]}.png')
+        plt.savefig(f'{directory2}/piechart_{pensum_courses[j]}.png')
         plt.cla()
         plt.close()
 
@@ -230,7 +230,7 @@ for i in range(len(todosPeriodos)):
             del results[cohorte][zero_key]
 
     #Stadisticas cohorte
-    breakpoint()
+
     for periodo in cohortes_dict:
         if periodo in todosPeriodos:
             semestre_actual=i-list(todosPeriodos).index(periodo)
@@ -285,7 +285,7 @@ for i in range(len(todosPeriodos)):
     plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
     plt.title(f'Avance de todos los estudiantes en el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
     plt.legend(all_cohortes.keys())
-    #plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_all_cohortes.png')
+    plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_all_cohortes.png')
     plt.cla()
     plt.close()
 
@@ -356,6 +356,8 @@ for periodo in todosPeriodos:
     avance_prom=np.round(np.mean(y_list),2)
     plt.title(f"Cohorte {periodo} (AP={avance_prom})",fontsize=18)
     plt.savefig(f'{directory}/{periodo}_avance.png')
+    plt.cla()
+    plt.close()
 
 #%% Grafica de avance para todas las cohortes juntas
 
@@ -376,6 +378,8 @@ plt.legend(fontsize=12, loc=2)
 plt.xticks(range(1,12))
 plt.title(f"Avance promedio por cohorte",fontsize=18)
 plt.savefig(f'{directory}/cohortes_avance.png')
+plt.cla()
+plt.close()
 
 #%% Gráficas de N por cohortes
 
@@ -393,6 +397,8 @@ for periodo in todosPeriodos:
     plt.legend(fontsize=12, loc=3)
     plt.title(f"Cohorte {periodo}",fontsize=18)
     plt.savefig(f'{directory}/{periodo}_n.png')
+    plt.cla()
+    plt.close()
 
 #%% Gráfica de N para todas las cohortes juntas
 
@@ -412,6 +418,8 @@ plt.ylabel('Número de estudiantes',fontsize=14)
 plt.legend(fontsize=12, loc=1)
 plt.title(f"N por cohorte",fontsize=18)
 plt.savefig(f'{directory}/cohortes_n.png')
+plt.cla()
+plt.close()
 
 #%% Sancionados
 
@@ -438,6 +446,8 @@ plt.legend(fontsize=12, loc=2)
 avance_prom=np.round(np.mean(mean_sancionados_list),2)
 plt.title(f"Sancionados (AP={avance_prom})",fontsize=18)
 plt.savefig(f'{directory}/sancionados_avance.png')
+plt.cla()
+plt.close()
 
 #%% Gráfica de N para sancionados
 
@@ -450,6 +460,8 @@ plt.ylabel('Número de estudiantes',fontsize=14)
 plt.title(f"Estudiantes sancionados",fontsize=18)
 plt.legend(fontsize=12, loc=3)
 plt.savefig(f'{directory}/sancionados_n.png')
+plt.cla()
+plt.close()
 
 #%% Gráficas de estadísticas por materia
 
@@ -478,7 +490,36 @@ directory = f"Results_new/Subject_Results"
 if not os.path.exists(directory):
     os.makedirs(directory)
 
+
+max_n = 0
+max_mean, min_mean = 0, 0
+max_value, min_value = 0, 10
+min_desv, max_desv = 0, 0
+media_max , media_min = 0,10
+for course in results_dict.values():
+    for semester in course.values():
+        if semester['n'] > max_n:
+            max_n = semester['n']
+        if semester['mean'] > media_max:
+            media_max = semester['mean']
+        if semester['mean'] < media_min:
+            media_min = semester['mean']
+        if semester['std_dev']+ semester['mean'] > max_value:
+            max_mean = semester['mean']
+            max_desv = semester['std_dev']
+            max_value = semester['std_dev']+ semester['mean']
+
+        if  semester['mean'] - semester['std_dev']< min_value:
+            min_mean = semester['mean']
+            min_desv = semester['std_dev']
+            min_value = semester['mean'] - semester['std_dev']
+
 for i in range(len(pensum_courses)):
+
+    directory = f'Results_new/Subject_Results/{pensum_courses[i]}'
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     x = list(results_dict[pensum_courses[i]].keys())
     x_list = [str(i) for i in x]
@@ -486,15 +527,114 @@ for i in range(len(pensum_courses)):
     y_err = [results_dict[pensum_courses[i]][year]['std_dev'] for year in x]
     n = [results_dict[pensum_courses[i]][year]['n'] for year in x]
 
+    fig, ax = plt.subplots()
     plt.errorbar(x_list, y, yerr=y_err, color='red', linewidth=0.8, fmt='o--', ecolor='black', capsize=7, elinewidth=1, markeredgewidth=1)
     plt.xticks(x_list)
     plt.xlabel('Semestre')
+    plt.ylim(min_value-0.1, max_mean+max_desv+0.1)
     plt.ylabel('Avance Promedio')
-    
-    for y_n, y_val in enumerate(y):
-        plt.text(x_list[y_n], y_val + y_err[y_n] + 0.1, f'{n[y_n]}', ha='center')
+    ax.axhline(y=0, linestyle='dotted', color='blue')
+    #Poner el numero de estudiantes (n) en el cap
+    #for y_n, y_val in enumerate(y):
+    #    plt.text(x_list[y_n], y_val + y_err[y_n] + 0.1, f'{n[y_n]}', ha='center')
     plt.title(f'{pensum_courses[i]}{" "}{cursos[pensum_courses[i]][1]}')
     plt.show()
-    plt.savefig(f'Results_new/Subject_Results/{pensum_courses[i]}.png')
+    ax.text(8.5,6,f'{" Avance promedio: "}{round(np.mean(y),3)}\n{" Desviación promedio: "}{round(np.mean(y_err),3)}', fontsize=10, ha='center', va='center',
+        bbox=dict(boxstyle='square', facecolor='white', alpha=0.5))
+    plt.savefig(f'Results_new/Subject_Results/{pensum_courses[i]}/mean_desv_{pensum_courses[i]}.png')
+    plt.cla()
+    plt.close()
+
+for i in range(len(pensum_courses)):
+
+    x = list(results_dict[pensum_courses[i]].keys())
+    x_list = [str(i) for i in x]
+    y = [results_dict[pensum_courses[i]][year]['mean'] for year in x]
+    n_est = [results_dict[pensum_courses[i]][year]['n'] for year in x]
+    
+    fig, ax1 = plt.subplots()
+
+    ax1.bar(x_list, n_est, color="skyblue")
+    plt.xticks(x_list)
+    plt.xlabel('Semestre')
+    plt.ylabel('Número de estudiantes')
+    ax1.set_ylim([0,max_n+5])
+    ax1.text(8.5,88,f'{" Avance promedio: "}{round(np.mean(y),3)}\n{" Estudiantes promedio: "}{round(np.mean(n_est),3)}', fontsize=10, ha='center', va='center',
+        bbox=dict(boxstyle='square', facecolor='white', alpha=0.5))
+    ax2 = ax1.twinx()
+
+    ax2.plot(x_list,y,'--o', linewidth=0.8, color='black')
+    ax2.grid(False)
+    plt.ylabel('Avance promedio')
+    ax2.set_ylim([media_min-0.1,media_max+0.15])
+
+    plt.title(f'{pensum_courses[i]}{" "}{cursos[pensum_courses[i]][1]}')
+    
+    plt.savefig(f'Results_new/Subject_Results/{pensum_courses[i]}/barplot_{pensum_courses[i]}.png')
+    plt.cla()
+    plt.close()
+
+
+##
+
+#Promedio por Niveles 
+
+
+
+medias_niveles ={}
+for i in range(3):
+    nivel = i+1
+    materias_nivel = [key for key in results_dict.keys() if key.startswith(f'IBIO-{nivel}')]
+    
+    nivel = {}
+    for materia in materias_nivel:
+        valores = results_dict[materia]
+        
+        for anio in valores.keys():
+            
+            if anio not in nivel:
+                nivel[anio]=valores[anio]['mean']
+            else: 
+                nivel[anio]+=valores[anio]['mean']
+
+    for key in nivel:
+        nivel[key] = nivel[key] / len(materias_nivel)
+
+    medias_niveles[i+1]=nivel
+
+
+for i in range(len(pensum_courses)):
+    
+    nivel_materia= int(pensum_courses[i][5])
+    y_nivel = list(medias_niveles[nivel_materia].values())
+    x_2 = list(medias_niveles[nivel_materia].keys())
+
+    x = list(results_dict[pensum_courses[i]].keys())
+    x_list = [str(i) for i in x]
+    x_nivel = [str(i) for i in x_2]
+
+    if len(x_list) != len(x_nivel):
+        del x_nivel[0]
+        del y_nivel[0]
+
+    y = [results_dict[pensum_courses[i]][year]['mean'] for year in x]
+    
+
+    fig, ax = plt.subplots()
+    plt.plot(x_list, y, '--o', label=f'{pensum_courses[i]}', linewidth=0.8, color='black')
+    plt.plot(x_nivel, y_nivel, '--o', label = f'{"Promedio Nivel "}{nivel_materia}' , linewidth=0.8, color='red')
+    plt.xticks(x_nivel)
+    plt.xlabel('Semestre')
+
+    ax.text(1,4.3,f'{" Avance "}{pensum_courses[i]}{": "}{round(np.mean(y),3)}\n{" Avance Nivel "}{nivel_materia}{": "}{round(np.mean(y_nivel),3)}', fontsize=10, ha='center', va='center',
+        bbox=dict(boxstyle='square', facecolor='white', alpha=0.5))
+    ax.set_ylim([-0.5,media_max+0.15])
+    plt.ylabel('Avance Promedio')
+    ax.axhline(y=0, linestyle='dotted', color='blue')
+    
+    plt.title(f'{pensum_courses[i]}{" "}{cursos[pensum_courses[i]][1]}')
+    plt.legend()
+
+    plt.savefig(f'Results_new/Subject_Results/{pensum_courses[i]}/Comparacion_Nivel_{pensum_courses[i]}.png')
     plt.cla()
     plt.close()
