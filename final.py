@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.patches as mpatches
 import matplotlib.colors as mcolors
-from utils import Avance, Semestre, assign_group, fill_results_dict, medianNivel
-from plots import piecharts_por_materia, std_dev_plot, comparacionNivelPlot, retiros_plot, retiros_plot_resumido
+from utils import Avance, Semestre, assign_group, fill_results_dict, medianNivel, retirosPorMateria
+from plots import piecharts_por_materia, std_dev_plot, comparacionNivelPlot, graficaSumaRetiros
 from tqdm import tqdm
 
 def load_cursos_obligatorios():
@@ -34,9 +34,6 @@ def IBIO_columns (solo_IBIO, pensum_courses):
     solo_IBIO = solo_IBIO.reset_index()
     solo_IBIO = solo_IBIO.drop('index', axis=1)
 
-    periodo = solo_IBIO["Periodo"]
-
-    todosPeriodos = np.unique(periodo)
     #Convert code to int
     solo_IBIO['Código est'] = solo_IBIO['Código est'].astype(int)
 
@@ -87,17 +84,11 @@ def mainMaterias(path, desired_program, directory_name):
             if not os.path.exists(directory2):
                 os.makedirs(directory2)
 
-            condition = solo_IBIO['Materia']== pensum_courses[j]
+            condition_materia = solo_IBIO['Materia']== pensum_courses[j]
 
             condition_anio = solo_IBIO['Periodo']== todosPeriodos[i]
 
-            condition_anio = condition_anio.reset_index(drop=True)
-
-            df_materia = solo_IBIO.loc[condition]
-
-            df_materia = df_materia.reset_index(drop=True)
-
-            df_materia_anio = df_materia.loc[condition_anio]
+            df_materia_anio = solo_IBIO.loc[condition_materia & condition_anio]
 
             # count the number of values in each group
             counts = df_materia_anio['Group'].value_counts()
@@ -231,74 +222,68 @@ def Retiros (path, original_path, desired_program, directory_name):
                 max_value = semester['std_dev']+ semester['mean']
             if  semester['mean'] - semester['std_dev']< min_value:
                 min_value = semester['mean'] - semester['std_dev']
+                        
+    list_dict_retiros, list_dict_estudiantes, list_dict_avance = retirosPorMateria (pensum_courses, results_dict, medias_niveles, retiros_count, max_n, media_min, media_max, cursos, directory_name)
+
+    ## Retiros promedio
+
+    accumulated_retiros = {}
+    accumulated_estudiantes = {}
+    accumulated_avance = {}
+
+    
+    # loop over each iteration's dictionary
+    for d in list_dict_retiros:
+        # iterate over each key-value pair in the dictionary
+        for key, value in d.items():
+            # add the value to the running total for this key
+            accumulated_retiros[key] = accumulated_retiros.get(key, 0) + value
+
+    # loop over each iteration's dictionary
+    for d in list_dict_estudiantes:
+        # iterate over each key-value pair in the dictionary
+        for key, value in d.items():
+            # add the value to the running total for this key
+            accumulated_estudiantes[key] = accumulated_estudiantes.get(key, 0) + value
 
 
-    for i in tqdm(range(len(pensum_courses)), desc="Graficas Retiros"):
-
-        x = list(results_dict[pensum_courses[i]].keys())
-        x_list = [str(i) for i in x]
-        y = [results_dict[pensum_courses[i]][year]['mean'] for year in x]
-        n_est = [results_dict[pensum_courses[i]][year]['n'] for year in x]
-
-        nivel_materia= int(pensum_courses[i][5])
-        y_nivel = list(medias_niveles[nivel_materia].values())
-        x_2 = list(medias_niveles[nivel_materia].keys())
-        x_nivel = [str(i) for i in x_2]
-
-        if len(x_list) != len(x_nivel):
-            del x_nivel[0]
-            del y_nivel[0]
-        
-        retirosMateria = retiros_count[pensum_courses[i]]
-
-        result_list_retiros = []
-        for item in x_nivel:
-            if item in retirosMateria:
-                result_list_retiros.append(retirosMateria[item])
-            else:
-                result_list_retiros.append(0)
-
-                
-        retiros_plot(y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x_nivel, y_nivel, nivel_materia, media_min, media_max, cursos, i, directory_name)
+    for d in list_dict_avance:
+        # iterate over each key-value pair in the dictionary
+        for key, value in d.items():
+            # add the value to the running total for this key
+            accumulated_avance[key] = accumulated_avance.get(key, 0) + value
 
 
+    estudiantes_totales = list(accumulated_estudiantes.values())
+    retiros_totales = list(accumulated_retiros.values())
+    retiros_x = list(accumulated_retiros.keys())
+    avance_general = list(accumulated_avance.values())
+    semestres = list(accumulated_avance.keys())
 
-    list_dict_estudiantes = []
-    list_dict_retiros = []
-    list_dict_avance = []
+    divisor = len(pensum_courses)
 
-    for i in tqdm(range(len(pensum_courses)), desc="Graficas Retiros Resumidas"):
+    result_list_retiros = []
+    result_list_estudiantes = []
+    result_list_avance = []
 
-        x = list(results_dict[pensum_courses[i]].keys())
-        x_list = [str(i) for i in x]
-        y = [results_dict[pensum_courses[i]][year]['mean'] for year in x]
-        n_est = [results_dict[pensum_courses[i]][year]['n'] for year in x]
-        
-        
-        my_dict_avance = dict(zip(x_list, y))
-        list_dict_avance.append(my_dict_avance)
+    for i in range(len(retiros_totales)):
 
-        nivel_materia= int(pensum_courses[i][5])
-        y_nivel = list(medias_niveles[nivel_materia].values())
-        x_2 = list(medias_niveles[nivel_materia].keys())
-        x_nivel = [str(i) for i in x_2]
+        result_list_retiros.append(retiros_totales[i]/divisor)
 
-        if len(x_list) != len(x_nivel):
-            del x_nivel[0]
-            del y_nivel[0]
-        
-        retirosMateria = retiros_count[pensum_courses[i]]
+    for i in range(len(estudiantes_totales)):
+        result_list_estudiantes.append(estudiantes_totales[i]/divisor)
+        result_list_avance.append(avance_general[i]/divisor)
 
-        my_dict_estudiantes = dict(zip(x_list, n_est))
+    semestreDani = [441,450,473,466,529,410,534,524,522,536,534]
+    o=[0,0,0,0,63, 89, 38, 92, 62, 49, 10]
 
-        result_list_retiros = []
-        for item in x_nivel:
-            if item in retirosMateria:
-                result_list_retiros.append(retirosMateria[item])
-            else:
-                result_list_retiros.append(0)
+    sum_list = [semestreDani[i] + o[i] for i in range(len(semestreDani))]
 
-        list_dict_retiros.append(retirosMateria)
-        list_dict_estudiantes.append(my_dict_estudiantes)
+    graficaSumaRetiros(semestres, sum_list, retiros_x, retiros_totales, result_list_avance, directory_name)
 
-        retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x_nivel, y_nivel, nivel_materia, media_min, media_max, cursos, i, directory_name)
+
+excelPath = "Data/Cursos IBIO 2018-2023.xlsx"
+desired_program = 'INGENIERIA BIOMEDICA'
+directory_name = 'PieCharts_por_Materia' #Nombre de la carpeta donde queremos que se guarden los resultados
+
+mainMaterias(excelPath, desired_program, directory_name)
