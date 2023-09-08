@@ -48,7 +48,7 @@ def IBIO_columns (solo_IBIO, pensum_courses):
 
     solo_IBIO['Group'] = solo_IBIO['Avance'].apply(assign_group)
 
-    return solo_IBIO
+    return solo_IBIO, todosPeriodos
 
 def mainMaterias(path, desired_program, directory_name):
 
@@ -64,11 +64,9 @@ def mainMaterias(path, desired_program, directory_name):
 
     solo_IBIO = soloIBIO_df(xlsx, mask)
 
-    solo_IBIO = IBIO_columns(solo_IBIO, pensum_courses)
+    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
 
     periodo = solo_IBIO["Periodo"]
-
-    todosPeriodos = np.unique(periodo)
 
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
@@ -302,3 +300,362 @@ def Retiros (path, original_path, desired_program, directory_name):
         list_dict_estudiantes.append(my_dict_estudiantes)
 
         retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x_nivel, y_nivel, nivel_materia, media_min, media_max, cursos, i, directory_name)
+
+def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
+    
+    cursos = load_cursos_obligatorios()
+    pensum_courses = list(cursos.keys())     
+    xlsx = pd.read_excel(xlsx_cursos)
+    mask = xlsx['Programa principal'] == desired_program
+    solo_IBIO = soloIBIO_df(xlsx, mask)
+    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
+
+    #Todas las cohortes
+    mean_dataframe=pd.DataFrame()
+    desv_dataframe=pd.DataFrame()
+    n_dataframe=pd.DataFrame()
+
+    #Estudiantes sacionados
+    sancionados_xlsx=pd.read_excel(xlsx_sancionados)
+    sancionados=list(sancionados_xlsx["CÓDIGO"])
+    sancionados_dict={}
+    mean_sancionados=pd.DataFrame()
+    desv_sancionados=pd.DataFrame()
+    n_sancionados=pd.DataFrame([0]*11)
+    n_sancionados.index=todosPeriodos
+
+    for i in range(len(todosPeriodos)):
+
+        condicion_periodo = solo_IBIO['Periodo']==todosPeriodos[i]
+        df_periodo=solo_IBIO[condicion_periodo]
+        cohortes_periodo=np.unique(df_periodo['Año Ingreso'])
+        cohortes_dict=dict.fromkeys(cohortes_periodo)
+        for cohorte in cohortes_dict:
+            cohortes_dict[cohorte]={}
+            sancionados_dict[cohorte]={}
+
+        estudiantes_periodo=np.unique(df_periodo['Código est'])
+        for estudiante in estudiantes_periodo:
+            semestre_ingreso=int(str(estudiante)[:5])
+            cohortes_dict[semestre_ingreso][estudiante]=np.mean(df_periodo[df_periodo['Código est']==estudiante]["Avance"])
+            if estudiante in sancionados:
+                sancionados_dict[semestre_ingreso][estudiante]=np.mean(df_periodo[df_periodo['Código est']==estudiante]["Avance"])
+            
+        results={}
+
+        for cohorte in cohortes_dict:
+
+            results[cohorte]={">3":0,"3-2":0,"2-1":0,"1-0":0,"0-1":0,"-1-2":0,"-2-3":0}
+            zero_values=[]
+
+            for estudiante in cohortes_dict[cohorte]:
+                if cohortes_dict[cohorte][estudiante]>=3:
+                    results[cohorte][">3"]+=1
+                elif 3>cohortes_dict[cohorte][estudiante]>=2:
+                    results[cohorte]["3-2"]+=1
+                elif 2>cohortes_dict[cohorte][estudiante]>=1:
+                    results[cohorte]["2-1"]+=1
+                elif 1>cohortes_dict[cohorte][estudiante]>=0:
+                    results[cohorte]["1-0"]+=1
+                elif 0>cohortes_dict[cohorte][estudiante]>=-1:
+                    results[cohorte]["0-1"]+=1
+                elif -1>cohortes_dict[cohorte][estudiante]>=-2:
+                    results[cohorte]["-1-2"]+=1
+                elif -2>cohortes_dict[cohorte][estudiante]>=-3:
+                    results[cohorte]["-2-3"]+=1
+
+            for key in results[cohorte]:
+                if results[cohorte][key]==0:
+                    zero_values.append(key)
+            
+            for zero_key in zero_values:
+                del results[cohorte][zero_key]
+
+        #Stadisticas cohorte
+
+        for periodo in cohortes_dict:
+            if periodo in todosPeriodos:
+                semestre_actual=i-list(todosPeriodos).index(periodo)
+                mean=np.mean(list(cohortes_dict[periodo].values()))
+                desv=np.std(list(cohortes_dict[periodo].values()))
+                n=len(list(cohortes_dict[periodo].values()))
+                mean_dataframe.loc[periodo,semestre_actual]=mean
+                desv_dataframe.loc[periodo,semestre_actual]=desv
+
+        for periodo in sancionados_dict:
+            if periodo in todosPeriodos:
+                semestre_actual=i-list(todosPeriodos).index(periodo)
+                mean=np.mean(list(sancionados_dict[periodo].values()))
+                desv=np.std(list(sancionados_dict[periodo].values()))
+                n=len(list(sancionados_dict[periodo].values()))
+                mean_sancionados.loc[periodo,semestre_actual]=mean
+                desv_sancionados.loc[periodo,semestre_actual]=desv
+
+        group_colors_2 = {
+        '>3': '#d3554c',
+        '3-2': '#fc6c64',
+        '2-1': '#feb268',
+        '1-0': '#f7e16a',
+        '0-1': '#ffe9af',
+        '-1-2': '#d3e1a2',
+        '-2-3': '#a9e070',
+        }
+
+        # plot a pie chart with the counts
+        for anio in results:
+            plt.figure()
+            plt.style.use('seaborn')
+            colors2 = [group_colors_2[group] for group in results[anio]]
+            plt.pie(results[anio].values(), autopct=lambda x: f'{int(round(x/100.0*sum(results[anio].values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(results[anio]))
+            plt.title(f'Avance de los estudiantes ingresados en {anio} para el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
+            plt.legend(results[anio].keys())
+            plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_{str(anio)}.png')
+            plt.cla()
+            plt.close()
+
+        all_cohortes = {">3":0,"3-2":0,"2-1":0,"1-0":0,"0-1":0,"-1-2":0,"-2-3":0}
+        for anio in results:
+            for key in results[anio]:
+                all_cohortes[key]+=results[anio][key]
+        
+        all_cohortes = {key: value for key, value in all_cohortes.items() if value != 0}
+        plt.figure()
+        plt.style.use('seaborn')
+        colors2 = [group_colors_2[group] for group in all_cohortes]
+        plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
+        plt.title(f'Avance de todos los estudiantes en el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
+        plt.legend(all_cohortes.keys())
+        plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_all_cohortes.png')
+        plt.cla()
+        plt.close()
+    
+    return mean_sancionados, desv_sancionados, n_sancionados
+
+def todosIBIO(xlsx):
+        
+    mask = xlsx['Programa principal'] == 'INGENIERIA BIOMEDICA'
+    todos_IBIO = xlsx[mask]
+    todos_IBIO = todos_IBIO.reset_index()
+    todos_IBIO['Periodo'] = todos_IBIO['Periodo'].astype(str).str[:5].astype(int)
+    todos_IBIO = todos_IBIO.drop('index', axis=1)
+    todos_IBIO['Código est'] = todos_IBIO['Código est'].astype(int)
+    todos_IBIO['Año Ingreso'] = todos_IBIO['Código est'].astype(str).str[:5].astype(int)
+
+def n_estudiantes(xlsx_cursos, sancionados_xlsx, estudiantes_xlsx, directory, desired_program):
+
+    n_dataframe=pd.DataFrame()
+    sancionados_xlsx=pd.read_excel(sancionados_xlsx)
+    sancionados=list(sancionados_xlsx["CÓDIGO"])
+    n_sancionados=pd.DataFrame([0]*11)
+    n_sancionados.index=todosPeriodos
+
+    cursos = load_cursos_obligatorios()
+    pensum_courses = list(cursos.keys())     
+    xlsx = pd.read_excel(xlsx_cursos)
+    mask = xlsx['Programa principal'] == desired_program
+    solo_IBIO = soloIBIO_df(xlsx, mask)
+    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
+    todos_IBIO = todosIBIO(xlsx)
+
+    for i in range(len(todosPeriodos)):
+    condicion_periodo = todos_IBIO['Periodo']==todosPeriodos[i]
+    df_periodo=todos_IBIO[condicion_periodo]
+    for j in range(len(df_periodo)): 
+        if df_periodo.iloc[j]['Año Ingreso'] in todosPeriodos:
+            periodo = df_periodo.iloc[j]['Año Ingreso']
+            condicion_semestre=df_periodo['Año Ingreso']==periodo
+            df_estudiantes=df_periodo[condicion_semestre]
+            estudiantes_unicos=np.unique(df_estudiantes['Código est'])
+            n_estudiantes=len(estudiantes_unicos)
+            semestre_actual=i-list(todosPeriodos).index(periodo)
+            n_dataframe.loc[periodo,semestre_actual]=n_estudiantes
+            contador_sancionados=0
+            for codigo in estudiantes_unicos:
+                if codigo in sancionados:
+                    contador_sancionados+=1
+            n_sancionados.loc[periodo,semestre_actual]=contador_sancionados
+    
+    xlsx_estudiantes = pd.read_excel(estudiantes_xlsx, sheet_name=None)
+    todosPeriodos = list(xlsx_estudiantes.keys())
+    todosPeriodos = list(map(int, todosPeriodos))
+
+    for sheet_name in xlsx_estudiantes:
+        estudiantes = xlsx_estudiantes[sheet_name]
+        IBIO = estudiantes['Programa principal'] == "INGENIERIA BIOMEDICA"
+        estudiantes = estudiantes[IBIO].reset_index()
+        periodos = np.unique(estudiantes["SemestreInicio"])
+        for i in periodos:
+            if i in todosPeriodos:
+                semestre_actual=todosPeriodos.index(int(sheet_name))-todosPeriodos.index(i)
+                conteo = estudiantes['SemestreInicio'].value_counts()[i]
+                n_dataframe.loc[i,semestre_actual]=conteo
+
+    mean_n_hist=[]
+
+    for semestre in range(11):
+        n=[n_dataframe[semestre][x] for x in todosPeriodos if not np.isnan(n_dataframe[semestre][x])]
+        mean_n_hist.append(np.mean(n))
+
+    for periodo in todosPeriodos:
+        plt.figure(figsize=(10,7.5))
+        lim=sum([not np.isnan(n_dataframe.loc[periodo][x]) for x in range(11)])
+        x_list=range(1,lim+1)
+        n_list=n_dataframe.loc[periodo][:lim]
+        plt.plot(x_list, mean_n_hist[:lim], 'o--', linewidth=0.8, label="N histórico", color="black")
+        plt.plot(x_list, n_list, 'o--', linewidth=0.8, label="N cohorte", color='red')
+        plt.xticks(x_list)
+        plt.ylim((0,90))
+        plt.xlabel('Semestre',fontsize=14)
+        plt.ylabel('Número de estudiantes',fontsize=14)
+        plt.legend(fontsize=12, loc=3)
+        plt.title(f"Número de estudiantes cohorte {periodo}",fontsize=18)
+        plt.savefig(f'{directory}/{periodo}_n.png')
+        plt.cla()
+        plt.close()
+
+    # Gráfica de N para todas las cohortes juntas
+
+    plt.figure(figsize=(10,7.5))
+    colors_list=["maroon","firebrick","red","orange","gold","yellow","greenyellow","limegreen","green","darkgreen","darkslategray"]
+
+    for i in range(len(todosPeriodos)):
+        lim=sum([not np.isnan(n_dataframe.loc[todosPeriodos[i]][x]) for x in range(11)])
+        x_list=range(1,lim+1)
+        n_list=n_dataframe.loc[todosPeriodos[i]][:lim]
+        plt.plot(x_list, n_list, 'o--', linewidth=0.8, label=todosPeriodos[i], color=colors_list[i])
+
+    plt.plot(range(1,12), mean_n_hist, 'o--', linewidth=0.8, label="N histórico",color="black")
+    plt.xticks(range(1,12))
+    plt.xlabel('Semestre',fontsize=14)
+    plt.ylabel('Número de estudiantes',fontsize=14)
+    plt.legend(fontsize=12, loc=1)
+    plt.title(f"N por cohorte",fontsize=18)
+    plt.savefig(f'{directory}/cohortes_n.png')
+    plt.cla()
+    plt.close()
+
+    return mean_n_hist
+
+def historico_cohortes(xlsx_cursos, directory, desired_program):
+
+    cursos = load_cursos_obligatorios()
+    pensum_courses = list(cursos.keys()) 
+    mean_dataframe=pd.DataFrame()
+    desv_dataframe=pd.DataFrame()  
+    n_dataframe=pd.DataFrame()
+    mean_avance_hist=[]
+
+    xlsx = pd.read_excel(xlsx_cursos)
+    mask = xlsx['Programa principal'] == desired_program
+    solo_IBIO = soloIBIO_df(xlsx, mask)
+    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
+
+    for semestre in range(11):
+        avance=[mean_dataframe[semestre][x] for x in todosPeriodos if not np.isnan(mean_dataframe[semestre][x])]
+        n=[n_dataframe[semestre][x] for x in todosPeriodos if not np.isnan(n_dataframe[semestre][x])]
+        mean_avance_hist.append(np.mean(avance))
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    
+    for periodo in todosPeriodos:
+        plt.figure(figsize=(10,7.5))
+        lim=sum([not np.isnan(mean_dataframe.loc[periodo][x]) for x in range(11)])
+        x_list=range(1,lim+1)
+        y_list=mean_dataframe.loc[periodo][:lim]
+        y_err=desv_dataframe.loc[periodo][:lim]
+        plt.plot(x_list, mean_avance_hist[:lim], 'o--', linewidth=0.8, label="Avance promedio histórico")
+        plt.axhline(y=0, color="black", linewidth=0.8, linestyle='--')
+        plt.errorbar(x_list, y_list, yerr=y_err, color='red', linewidth=0.8, fmt='o--', ecolor='black', label="Avance cohorte")
+        plt.ylim((-1,5))
+        plt.xticks(x_list)
+        plt.xlabel('Semestre',fontsize=14)
+        plt.ylabel('Avance Promedio',fontsize=14)
+        plt.legend(fontsize=12, loc=2)
+        avance_prom=np.round(np.mean(y_list),2)
+        plt.title(f"Cohorte {periodo} (AP={avance_prom})",fontsize=18)
+        plt.savefig(f'{directory}/{periodo}_avance.png')
+        plt.cla()
+        plt.close()
+
+    # Grafica de avance para todas las cohortes juntas
+
+    plt.figure(figsize=(10,7.5))
+    colors_list=list(mcolors.TABLEAU_COLORS.values())
+    colors_list.append('#000000')
+
+    for i in range(len(todosPeriodos)):
+        lim=sum([not np.isnan(mean_dataframe.loc[todosPeriodos[i]][x]) for x in range(11)])
+        x_list=range(1,lim+1)
+        y_list=mean_dataframe.loc[todosPeriodos[i]][:lim]
+        plt.plot(x_list, y_list, 'o--', linewidth=0.8, label=todosPeriodos[i],color=colors_list[i])
+        plt.axhline(y=0, color="black", linewidth=0.8, linestyle='--')
+        plt.ylim((-1,5))
+    plt.xlabel('Semestre',fontsize=14)
+    plt.ylabel('Avance Promedio',fontsize=14)
+    plt.legend(fontsize=12, loc=2)
+    plt.xticks(range(1,12))
+    plt.title(f"Avance promedio por cohorte",fontsize=18)
+    plt.savefig(f'{directory}/cohortes_avance.png')
+    plt.cla()
+    plt.close()
+
+    return mean_avance_hist
+
+def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_estudiantes):
+    
+    mean_sancionados, desv_sancionados, n_sancionados = avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program)
+    mean_avance_hist = historico_cohortes(xlsx_cursos, directory, desired_program)
+    mean_n_hist = n_estudiantes(xlsx_cursos, xlsx_sancionados, xlsx_estudiantes, directory, desired_program)
+    mean_sancionados_list=[]
+    desv_sancionados_list=[]
+    n_sancionados_list=[]
+    for i in range(9):
+        mean_sancionados_list.append(mean_sancionados[i].mean())
+        desv_sancionados_list.append(desv_sancionados[i].mean())
+        n_sancionados_list.append(n_sancionados[i].sum())
+
+    # Gráfica de avance para sancionados
+
+    plt.figure(figsize=(10,7.5))
+    x_list=range(1,10)
+    plt.axhline(y=0, color="black", linewidth=0.8, linestyle='--')
+    plt.plot(x_list, mean_avance_hist[:9], 'o--', linewidth=0.8, label="Avance promedio histórico")
+    plt.errorbar(x_list, mean_sancionados_list, yerr=desv_sancionados_list, color='red', linewidth=0.8, fmt='o--', ecolor='black', label="Avance promedio sancionados")
+    plt.ylim((-1,5))
+    plt.xticks(x_list)
+    plt.xlabel('Semestre',fontsize=14)
+    plt.ylabel('Avance Promedio',fontsize=14)
+    plt.legend(fontsize=12, loc=2)
+    avance_prom=np.round(np.mean(mean_sancionados_list),2)
+    plt.title(f"Sancionados (AP={avance_prom})",fontsize=18)
+    plt.savefig(f'{directory}/sancionados_avance.png')
+    plt.cla()
+    plt.close()
+
+    # Gráfica de N para sancionados
+
+    for sheet_name in xlsx_estudiantes:
+        estudiantes = xlsx_estudiantes[sheet_name]
+        IBIO = estudiantes['Programa principal'] == "INGENIERIA BIOMEDICA"
+        estudiantes = estudiantes[IBIO].reset_index()
+        for estudiante in estudiantes["Código est"]:
+            if estudiante in sancionados:
+                n_sancionados.loc[int(sheet_name)]+=1
+
+    plt.figure(figsize=(10,7.5))
+    x_list=range(1,12)
+    plt.plot(x_list, mean_n_hist, 'o--', linewidth=0.8, label="N histórico", color="black")
+    plt.plot(x_list, list(n_sancionados.T.loc[0]), 'o--', linewidth=0.8, label="Número de estudiantes", color="red")
+    plt.xlabel('Semestre',fontsize=14)
+    plt.ylabel('Número de estudiantes',fontsize=14)
+    plt.title(f"Estudiantes sancionados",fontsize=18)
+    plt.xticks(x_list,list(n_sancionados.T))
+    plt.legend(fontsize=12, loc=3)
+    plt.savefig(f'{directory}/sancionados_n.png')
+
+    plt.cla()
+    plt.close()      
+
+
+
