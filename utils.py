@@ -1,5 +1,6 @@
 import json
 import tqdm as tqdm
+from plots import retiros_plot, retiros_plot_resumido
 
 def assign_group(value):
     if value > 3:
@@ -115,3 +116,50 @@ def medianNivel (results_dict):
         medias_niveles[i+1]=nivel
 
     return medias_niveles
+
+
+def retirosPorMateria (pensum_courses, results_dict, medias_niveles, retiros_count, max_n, media_min, media_max, cursos, directory_name):
+
+    list_dict_estudiantes = []
+    list_dict_retiros = []
+    list_dict_avance = []
+
+    
+    for i in range(len(pensum_courses)):
+
+        x = list(results_dict[pensum_courses[i]].keys())
+        x_list = [str(i) for i in x]
+        y = [results_dict[pensum_courses[i]][year]['mean'] for year in x]
+        n_est = [results_dict[pensum_courses[i]][year]['n'] for year in x]
+        
+        
+        my_dict_avance = dict(zip(x_list, y))
+        list_dict_avance.append(my_dict_avance)
+
+        nivel_materia= int(pensum_courses[i][5])
+        y_nivel = list(medias_niveles[nivel_materia].values())
+        x_2 = list(medias_niveles[nivel_materia].keys())
+        x_nivel = [str(i) for i in x_2]
+
+        if len(x_list) != len(x_nivel):
+            del x_nivel[0]
+            del y_nivel[0]
+        
+        retirosMateria = retiros_count[pensum_courses[i]]
+
+        my_dict_estudiantes = dict(zip(x_list, n_est))
+
+        result_list_retiros = []
+        for item in x_nivel:
+            if item in retirosMateria:
+                result_list_retiros.append(retirosMateria[item])
+            else:
+                result_list_retiros.append(0)
+
+        list_dict_retiros.append(retirosMateria)
+        list_dict_estudiantes.append(my_dict_estudiantes)
+    
+        retiros_plot(y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x_nivel, y_nivel, nivel_materia, media_min, media_max, cursos, i, directory_name)
+        retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x_nivel, y_nivel, nivel_materia, media_min, media_max, cursos, i, directory_name)
+
+    return list_dict_retiros, list_dict_estudiantes, list_dict_avance

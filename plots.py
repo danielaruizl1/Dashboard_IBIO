@@ -150,3 +150,25 @@ def retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_
     plt.savefig(f'{directory_name}/Materias/{pensum_courses[i]}/retiros_barplot_{pensum_courses[i]}_resumida.png', bbox_inches='tight')
     plt.cla()
     plt.close()
+
+
+def graficaSumaRetiros(semestres, sum_list, retiros_x, retiros_totales, result_list_avance, directory):
+
+    fig, ax1 = plt.subplots(figsize=(8, 6))
+    ax1.bar(semestres, sum_list, color="cornflowerblue", width=0.5, label='Estudiantes totales')
+    ax1.bar(retiros_x, retiros_totales, color="salmon", width=0.5, label='Retiros')
+    ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
+            fancybox=True, shadow=True, ncol=5)
+    #plt.xticks(x_list)
+    plt.xlabel('Semestre')
+    plt.ylabel('Número de estudiantes')
+    ax2 = ax1.twinx()
+    ax2.plot(semestres,result_list_avance,'--o', label='Avance general',linewidth=0.8, color='red')
+    ax2.grid(False)
+    plt.ylabel('Avance promedio')
+    ax2.axhline(y=0, linestyle='dotted', color='blue')
+    plt.title('GRAFICA GENERAL POR PERIODOS')
+    plt.legend()
+    plt.savefig(f'{directory}/Materias/grafica_general_por_periodos.png', bbox_inches='tight')
+    plt.cla()
+    plt.close()
