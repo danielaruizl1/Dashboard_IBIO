@@ -32,7 +32,6 @@ def piecharts_por_materia (counts, cursos, pensum_courses, todosPeriodos, i, j,d
     plt.close()
 
 
-
 def std_dev_plot (results_dict, pensum_courses, min_value, max_mean, max_desv, cursos, i, directory_name):
 
     x = list(results_dict[pensum_courses[i]].keys())

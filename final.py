@@ -1,4 +1,4 @@
-#%% Importar librerias
+# Importar librerias
 import pandas as pd
 import json
 import os
@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.patches as mpatches
 import matplotlib.colors as mcolors
 from utils import Avance, Semestre, assign_group, fill_results_dict, medianNivel, retirosPorMateria
-from plots import piecharts_por_materia, std_dev_plot, comparacionNivelPlot, graficaSumaRetiros
+from plots import piecharts_por_materia, std_dev_plot, comparacionNivelPlot, graficaSumaRetiros, retiros_plot_resumido
 from tqdm import tqdm
 
 def load_cursos_obligatorios():
@@ -27,9 +27,10 @@ def soloIBIO_df (xlsx, mask):
 def IBIO_columns (solo_IBIO, pensum_courses):
 
     solo_IBIO['Periodo'] = solo_IBIO['Periodo'].astype(str).str[:5].astype(int)
+    periodo = solo_IBIO["Periodo"]
+    todosPeriodos = np.unique(periodo)
 
     solo_IBIO = solo_IBIO.drop('index', axis=1)
-
     solo_IBIO = solo_IBIO[solo_IBIO['Materia'].isin(pensum_courses)]
     solo_IBIO = solo_IBIO.reset_index()
     solo_IBIO = solo_IBIO.drop('index', axis=1)
@@ -63,8 +64,6 @@ def mainMaterias(path, desired_program, directory_name):
 
     solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
 
-    periodo = solo_IBIO["Periodo"]
-
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
 
@@ -96,7 +95,6 @@ def mainMaterias(path, desired_program, directory_name):
 
 def avanceNivel(path, desired_program, directory_name):
 
-
     cursos = load_cursos_obligatorios()
 
     pensum_courses = list(cursos.keys())
@@ -107,7 +105,7 @@ def avanceNivel(path, desired_program, directory_name):
 
     solo_IBIO = soloIBIO_df(xlsx, mask)
 
-    solo_IBIO = IBIO_columns(solo_IBIO, pensum_courses)
+    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
 
     results_dict = fill_results_dict(pensum_courses, solo_IBIO)
 
@@ -146,7 +144,7 @@ def avanceNivel(path, desired_program, directory_name):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        std_dev_plot (results_dict, pensum_courses, min_value, max_mean, max_desv, cursos, i, directory_name)
+        std_dev_plot(results_dict, pensum_courses, min_value, max_mean, max_desv, cursos, i, directory_name)
 
 
     comparacionNivel (results_dict, max_n, media_min, media_max, directory_name)
@@ -177,7 +175,7 @@ def comparacionNivel (results_dict, max_n, media_min, media_max, directory_name)
             del x_nivel[0]
             del y_nivel[0]
 
-        comparacionNivelPlot (directory_name, y,x_list, n_est, max_n, pensum_courses,i,x_nivel,y_nivel, nivel_materia,media_min, media_max, cursos)
+        comparacionNivelPlot(directory_name, y,x_list, n_est, max_n, pensum_courses,i,x_nivel,y_nivel, nivel_materia,media_min, media_max, cursos)
 
 
 def Retiros (path, original_path, desired_program, directory_name):
@@ -198,7 +196,7 @@ def Retiros (path, original_path, desired_program, directory_name):
 
     solo_IBIO = soloIBIO_df(xlsx, mask)
 
-    solo_IBIO = IBIO_columns(solo_IBIO, pensum_courses)
+    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
 
     results_dict = fill_results_dict (pensum_courses, solo_IBIO)
 
@@ -273,13 +271,13 @@ def Retiros (path, original_path, desired_program, directory_name):
         result_list_avance.append(avance_general[i]/divisor)
 
     semestreDani = [441,450,473,466,529,410,534,524,522,536,534]
-    o=[0,0,0,0,63, 89, 38, 92, 62, 49, 10]
+    o = [0,0,0,0,63, 89, 38, 92, 62, 49, 10]
 
     sum_list = [semestreDani[i] + o[i] for i in range(len(semestreDani))]
 
     graficaSumaRetiros(semestres, sum_list, retiros_x, retiros_totales, result_list_avance, directory_name)
 
-    retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x_nivel, y_nivel, nivel_materia, media_min, media_max, cursos, i, directory_name)
+    retiros_plot_resumido(y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x_nivel, y_nivel, nivel_materia, media_min, media_max, cursos, i, directory_name)
 
 def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
     
@@ -293,7 +291,6 @@ def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
     #Todas las cohortes
     mean_dataframe=pd.DataFrame()
     desv_dataframe=pd.DataFrame()
-    n_dataframe=pd.DataFrame()
 
     #Estudiantes sacionados
     sancionados_xlsx=pd.read_excel(xlsx_sancionados)
@@ -301,8 +298,6 @@ def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
     sancionados_dict={}
     mean_sancionados=pd.DataFrame()
     desv_sancionados=pd.DataFrame()
-    n_sancionados=pd.DataFrame([0]*11)
-    n_sancionados.index=todosPeriodos
 
     for i in range(len(todosPeriodos)):
 
@@ -358,7 +353,6 @@ def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
                 semestre_actual=i-list(todosPeriodos).index(periodo)
                 mean=np.mean(list(cohortes_dict[periodo].values()))
                 desv=np.std(list(cohortes_dict[periodo].values()))
-                n=len(list(cohortes_dict[periodo].values()))
                 mean_dataframe.loc[periodo,semestre_actual]=mean
                 desv_dataframe.loc[periodo,semestre_actual]=desv
 
@@ -367,9 +361,21 @@ def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
                 semestre_actual=i-list(todosPeriodos).index(periodo)
                 mean=np.mean(list(sancionados_dict[periodo].values()))
                 desv=np.std(list(sancionados_dict[periodo].values()))
-                n=len(list(sancionados_dict[periodo].values()))
                 mean_sancionados.loc[periodo,semestre_actual]=mean
                 desv_sancionados.loc[periodo,semestre_actual]=desv
+
+    return mean_dataframe, desv_dataframe, results, mean_sancionados, desv_sancionados, sancionados_dict
+
+def plot_avance_cohortes(xlsx_cursos, results, directory_name):
+
+    cursos = load_cursos_obligatorios()
+    pensum_courses = list(cursos.keys())     
+    xlsx = pd.read_excel(xlsx_cursos)
+    mask = xlsx['Programa principal'] == desired_program
+    solo_IBIO = soloIBIO_df(xlsx, mask)
+    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
+
+    for i in range(len(todosPeriodos)):
 
         group_colors_2 = {
         '>3': '#d3554c',
@@ -389,7 +395,10 @@ def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
             plt.pie(results[anio].values(), autopct=lambda x: f'{int(round(x/100.0*sum(results[anio].values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(results[anio]))
             plt.title(f'Avance de los estudiantes ingresados en {anio} para el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
             plt.legend(results[anio].keys())
-            plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_{str(anio)}.png')
+            directory = f'{directory_name}/{todosPeriodos[i]}'
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            plt.savefig(f'{directory}/piechart_{str(anio)}.png')
             plt.cla()
             plt.close()
 
@@ -405,11 +414,10 @@ def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
         plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
         plt.title(f'Avance de todos los estudiantes en el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
         plt.legend(all_cohortes.keys())
-        plt.savefig(f'Results_new/{todosPeriodos[i]}/piechart_all_cohortes.png')
+        plt.savefig(f'{directory}/piechart_all_cohortes.png')
         plt.cla()
         plt.close()
     
-    return mean_sancionados, desv_sancionados, n_sancionados
 
 def todosIBIO(xlsx):
         
@@ -421,39 +429,41 @@ def todosIBIO(xlsx):
     todos_IBIO['Código est'] = todos_IBIO['Código est'].astype(int)
     todos_IBIO['Año Ingreso'] = todos_IBIO['Código est'].astype(str).str[:5].astype(int)
 
-def n_estudiantes(xlsx_cursos, sancionados_xlsx, estudiantes_xlsx, directory, desired_program):
+    return todos_IBIO
+
+def n_estudiantes(xlsx_cursos, sancionados_xlsx, estudiantes_xlsx, desired_program):
 
     n_dataframe=pd.DataFrame()
     sancionados_xlsx=pd.read_excel(sancionados_xlsx)
     sancionados=list(sancionados_xlsx["CÓDIGO"])
     n_sancionados=pd.DataFrame([0]*11)
-    n_sancionados.index=todosPeriodos
-
+    
     cursos = load_cursos_obligatorios()
     pensum_courses = list(cursos.keys())     
     xlsx = pd.read_excel(xlsx_cursos)
     mask = xlsx['Programa principal'] == desired_program
     solo_IBIO = soloIBIO_df(xlsx, mask)
     solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
+    n_sancionados.index = todosPeriodos
     todos_IBIO = todosIBIO(xlsx)
 
     for i in range(len(todosPeriodos)):
-    condicion_periodo = todos_IBIO['Periodo']==todosPeriodos[i]
-    df_periodo=todos_IBIO[condicion_periodo]
-    for j in range(len(df_periodo)): 
-        if df_periodo.iloc[j]['Año Ingreso'] in todosPeriodos:
-            periodo = df_periodo.iloc[j]['Año Ingreso']
-            condicion_semestre=df_periodo['Año Ingreso']==periodo
-            df_estudiantes=df_periodo[condicion_semestre]
-            estudiantes_unicos=np.unique(df_estudiantes['Código est'])
-            n_estudiantes=len(estudiantes_unicos)
-            semestre_actual=i-list(todosPeriodos).index(periodo)
-            n_dataframe.loc[periodo,semestre_actual]=n_estudiantes
-            contador_sancionados=0
-            for codigo in estudiantes_unicos:
-                if codigo in sancionados:
-                    contador_sancionados+=1
-            n_sancionados.loc[periodo,semestre_actual]=contador_sancionados
+        condicion_periodo = todos_IBIO['Periodo']==todosPeriodos[i]
+        df_periodo = todos_IBIO[condicion_periodo]
+        for j in range(len(df_periodo)): 
+            if df_periodo.iloc[j]['Año Ingreso'] in todosPeriodos:
+                periodo = df_periodo.iloc[j]['Año Ingreso']
+                condicion_semestre=df_periodo['Año Ingreso']==periodo
+                df_estudiantes=df_periodo[condicion_semestre]
+                estudiantes_unicos=np.unique(df_estudiantes['Código est'])
+                n_estudiantes=len(estudiantes_unicos)
+                semestre_actual=i-list(todosPeriodos).index(periodo)
+                n_dataframe.loc[periodo,semestre_actual]=n_estudiantes
+                contador_sancionados=0
+                for codigo in estudiantes_unicos:
+                    if codigo in sancionados:
+                        contador_sancionados+=1
+                n_sancionados.loc[periodo,semestre_actual]=contador_sancionados
     
     xlsx_estudiantes = pd.read_excel(estudiantes_xlsx, sheet_name=None)
     todosPeriodos = list(xlsx_estudiantes.keys())
@@ -475,6 +485,20 @@ def n_estudiantes(xlsx_cursos, sancionados_xlsx, estudiantes_xlsx, directory, de
     for semestre in range(11):
         n=[n_dataframe[semestre][x] for x in todosPeriodos if not np.isnan(n_dataframe[semestre][x])]
         mean_n_hist.append(np.mean(n))
+
+    return n_dataframe, mean_n_hist, n_sancionados
+
+def plot_n_cohortes(xlsx_cursos, n_dataframe, mean_n_hist, directory):
+
+    cursos = load_cursos_obligatorios()
+    pensum_courses = list(cursos.keys())     
+    xlsx = pd.read_excel(xlsx_cursos)
+    mask = xlsx['Programa principal'] == desired_program
+    solo_IBIO = soloIBIO_df(xlsx, mask)
+    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     for periodo in todosPeriodos:
         plt.figure(figsize=(10,7.5))
@@ -514,26 +538,34 @@ def n_estudiantes(xlsx_cursos, sancionados_xlsx, estudiantes_xlsx, directory, de
     plt.cla()
     plt.close()
 
-    return mean_n_hist
-
-def historico_cohortes(xlsx_cursos, directory, desired_program):
+def historico_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
 
     cursos = load_cursos_obligatorios()
-    pensum_courses = list(cursos.keys()) 
-    mean_dataframe=pd.DataFrame()
-    desv_dataframe=pd.DataFrame()  
-    n_dataframe=pd.DataFrame()
-    mean_avance_hist=[]
-
+    pensum_courses = list(cursos.keys())
     xlsx = pd.read_excel(xlsx_cursos)
     mask = xlsx['Programa principal'] == desired_program
     solo_IBIO = soloIBIO_df(xlsx, mask)
     solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
 
+    mean_dataframe, desv_dataframe, _, _, _, _ = avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program)
+    mean_avance_hist=[]
+
     for semestre in range(11):
         avance=[mean_dataframe[semestre][x] for x in todosPeriodos if not np.isnan(mean_dataframe[semestre][x])]
-        n=[n_dataframe[semestre][x] for x in todosPeriodos if not np.isnan(n_dataframe[semestre][x])]
         mean_avance_hist.append(np.mean(avance))
+
+    return mean_avance_hist
+
+def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_dataframe, mean_avance_hist, directory):
+
+    cursos = load_cursos_obligatorios()
+    pensum_courses = list(cursos.keys())
+    xlsx = pd.read_excel(xlsx_cursos)
+    mask = xlsx['Programa principal'] == desired_program
+    solo_IBIO = soloIBIO_df(xlsx, mask)
+    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
+
+    mean_dataframe, desv_dataframe, _, _, _, _ = avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program)
 
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -571,6 +603,7 @@ def historico_cohortes(xlsx_cursos, directory, desired_program):
         plt.plot(x_list, y_list, 'o--', linewidth=0.8, label=todosPeriodos[i],color=colors_list[i])
         plt.axhline(y=0, color="black", linewidth=0.8, linestyle='--')
         plt.ylim((-1,5))
+
     plt.xlabel('Semestre',fontsize=14)
     plt.ylabel('Avance Promedio',fontsize=14)
     plt.legend(fontsize=12, loc=2)
@@ -580,13 +613,16 @@ def historico_cohortes(xlsx_cursos, directory, desired_program):
     plt.cla()
     plt.close()
 
-    return mean_avance_hist
 
 def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_estudiantes):
     
-    mean_sancionados, desv_sancionados, n_sancionados = avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program)
-    mean_avance_hist = historico_cohortes(xlsx_cursos, directory, desired_program)
-    mean_n_hist = n_estudiantes(xlsx_cursos, xlsx_sancionados, xlsx_estudiantes, directory, desired_program)
+    _, _, _, mean_sancionados, desv_sancionados, sancionados_dict = avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program)
+    n_dataframe, mean_n_hist, n_sancionados = n_estudiantes(xlsx_cursos, xlsx_sancionados, xlsx_estudiantes, desired_program)
+    mean_avance_hist = historico_cohortes(xlsx_cursos, xlsx_sancionados, desired_program)
+    
+    sancionados_xlsx=pd.read_excel(xlsx_sancionados)
+    sancionados=list(sancionados_xlsx["CÓDIGO"])
+
     mean_sancionados_list=[]
     desv_sancionados_list=[]
     n_sancionados_list=[]
@@ -596,6 +632,8 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
         n_sancionados_list.append(n_sancionados[i].sum())
 
     # Gráfica de avance para sancionados
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     plt.figure(figsize=(10,7.5))
     x_list=range(1,10)
@@ -614,6 +652,8 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
     plt.close()
 
     # Gráfica de N para sancionados
+
+    xlsx_estudiantes = pd.read_excel(xlsx_estudiantes, sheet_name=None)
 
     for sheet_name in xlsx_estudiantes:
         estudiantes = xlsx_estudiantes[sheet_name]
@@ -635,7 +675,12 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
     plt.savefig(f'{directory}/sancionados_n.png')
 
     plt.cla()
-    plt.close()      
+    plt.close()  
 
+cursos_excelPath = "Data/Cursos IBIO 2018-2023.xlsx"
+sancionados_excelPath = "Data/Estudiantes Sancionados 2021-10.xlsx"
+estudiantes_excelPath = "Data/Estudiantes IBIO 201810-202220.xlsx"
+desired_program = 'INGENIERIA BIOMEDICA'
+directory_name = "Sancionados"
 
-
+sancionados(cursos_excelPath, directory_name, desired_program, sancionados_excelPath, estudiantes_excelPath)
