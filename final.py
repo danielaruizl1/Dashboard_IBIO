@@ -271,10 +271,12 @@ def Retiros (path, original_path, desired_program, directory_name):
         result_list_estudiantes.append(estudiantes_totales[i]/divisor)
         result_list_avance.append(avance_general[i]/divisor)
 
-    semestreDani = [441,450,473,466,529,410,534,524,522,536,534]
-    o = [0,0,0,0,63, 89, 38, 92, 62, 49, 10]
+    breakpoint()
 
-    sum_list = [semestreDani[i] + o[i] for i in range(len(semestreDani))]
+    missing_values = [0, 0, 0, 0]
+    o = missing_values + retiros_totales
+
+    sum_list = [estudiantes_totales[i] + o[i] for i in range(len(estudiantes_totales))]
 
     graficaSumaRetiros(semestres, sum_list, retiros_x, retiros_totales, result_list_avance, directory_name)
 
@@ -676,10 +678,9 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
     plt.cla()
     plt.close() 
 
-cursos_excelPath = "Data/Cursos IBIO 2018-2023.xlsx"
-sancionados_excelPath = "Data/Estudiantes Sancionados 2021-10.xlsx"
-estudiantes_excelPath = "Data/Estudiantes IBIO 201810-202220.xlsx"
+path_retiros = "Data/Retiros 2018-10 a 202310.xlsx"
+path_estudiantes = "Data/Cursos IBIO 2018-2023.xlsx"
 desired_program = 'INGENIERIA BIOMEDICA'
-directory_name = "Sancionados"
+directory_name = 'Resultados_por_Materia'
 
-sancionados(cursos_excelPath, directory_name, desired_program, sancionados_excelPath, estudiantes_excelPath)
+Retiros (path_retiros, path_estudiantes, desired_program, directory_name)
