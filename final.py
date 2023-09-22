@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.patches as mpatches
 import matplotlib.colors as mcolors
-from utils import Avance, Semestre, assign_group, fill_results_dict, medianNivel, retirosPorMateria
+from utils2 import Avance, Semestre, assign_group, fill_results_dict, medianNivel, retirosPorMateria
 from plots import piecharts_por_materia, std_dev_plot, comparacionNivelPlot, graficaSumaRetiros, retiros_plot_resumido
 from tqdm import tqdm
 
@@ -50,6 +50,7 @@ def IBIO_columns (solo_IBIO, pensum_courses):
 
 def mainMaterias(path, desired_program, directory_name):
 
+    breakpoint()
     cursos = load_cursos_obligatorios()
 
     pensum_courses = list(cursos.keys())
@@ -276,8 +277,6 @@ def Retiros (path, original_path, desired_program, directory_name):
     sum_list = [semestreDani[i] + o[i] for i in range(len(semestreDani))]
 
     graficaSumaRetiros(semestres, sum_list, retiros_x, retiros_totales, result_list_avance, directory_name)
-
-    retiros_plot_resumido(y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x_nivel, y_nivel, nivel_materia, media_min, media_max, cursos, i, directory_name)
 
 def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
     
@@ -675,7 +674,7 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
     plt.savefig(f'{directory}/sancionados_n.png')
 
     plt.cla()
-    plt.close()  
+    plt.close() 
 
 cursos_excelPath = "Data/Cursos IBIO 2018-2023.xlsx"
 sancionados_excelPath = "Data/Estudiantes Sancionados 2021-10.xlsx"
