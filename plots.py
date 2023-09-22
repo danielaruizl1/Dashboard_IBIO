@@ -21,7 +21,6 @@ def piecharts_por_materia (counts, cursos, pensum_courses, todosPeriodos, i, j,d
     explode_list = [explode] * len(counts)
     
     fig, ax = plt.subplots()
-    plt.style.use('seaborn')
     wedges, labels, _ = ax.pie(counts, colors =colors,autopct=lambda x: f'{int(round(x/100.0*sum(counts)))} ({x:.1f}%)', 
                     textprops={'fontsize': 13}, explode = explode_list)
     ax.set_title(f'{cursos[pensum_courses[j]][1]}{" "}{todosPeriodos[i]}{0}', fontsize=16)

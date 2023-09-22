@@ -367,7 +367,7 @@ def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
 
     return mean_dataframe, desv_dataframe, results, mean_sancionados, desv_sancionados, sancionados_dict
 
-def plot_avance_cohortes(xlsx_cursos, results, directory_name):
+def plot_avance_cohortes(xlsx_cursos, results, directory_name, desired_program):
 
     cursos = load_cursos_obligatorios()
     pensum_courses = list(cursos.keys())     
@@ -391,7 +391,7 @@ def plot_avance_cohortes(xlsx_cursos, results, directory_name):
         # plot a pie chart with the counts
         for anio in results:
             plt.figure()
-            plt.style.use('seaborn')
+
             colors2 = [group_colors_2[group] for group in results[anio]]
             plt.pie(results[anio].values(), autopct=lambda x: f'{int(round(x/100.0*sum(results[anio].values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(results[anio]))
             plt.title(f'Avance de los estudiantes ingresados en {anio} para el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
@@ -410,7 +410,7 @@ def plot_avance_cohortes(xlsx_cursos, results, directory_name):
         
         all_cohortes = {key: value for key, value in all_cohortes.items() if value != 0}
         plt.figure()
-        plt.style.use('seaborn')
+
         colors2 = [group_colors_2[group] for group in all_cohortes]
         plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
         plt.title(f'Avance de todos los estudiantes en el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
@@ -489,7 +489,7 @@ def n_estudiantes(xlsx_cursos, sancionados_xlsx, estudiantes_xlsx, desired_progr
 
     return n_dataframe, mean_n_hist, n_sancionados
 
-def plot_n_cohortes(xlsx_cursos, n_dataframe, mean_n_hist, directory):
+def plot_n_cohortes(xlsx_cursos, n_dataframe, mean_n_hist, directory, desired_program):
 
     cursos = load_cursos_obligatorios()
     pensum_courses = list(cursos.keys())     
@@ -557,7 +557,7 @@ def historico_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
 
     return mean_avance_hist
 
-def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_dataframe, mean_avance_hist, directory):
+def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_dataframe, mean_avance_hist, directory, desired_program):
 
     cursos = load_cursos_obligatorios()
     pensum_courses = list(cursos.keys())
@@ -678,9 +678,3 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
     plt.cla()
     plt.close() 
 
-path_retiros = "Data/Retiros 2018-10 a 202310.xlsx"
-path_estudiantes = "Data/Cursos IBIO 2018-2023.xlsx"
-desired_program = 'INGENIERIA BIOMEDICA'
-directory_name = 'Resultados_por_Materia'
-
-Retiros (path_retiros, path_estudiantes, desired_program, directory_name)
