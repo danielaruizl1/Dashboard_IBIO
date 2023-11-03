@@ -50,7 +50,6 @@ def IBIO_columns (solo_IBIO, pensum_courses):
 
 def mainMaterias(path, desired_program, directory_name):
 
-    breakpoint()
     cursos = load_cursos_obligatorios()
 
     pensum_courses = list(cursos.keys())
@@ -76,8 +75,8 @@ def mainMaterias(path, desired_program, directory_name):
             os.makedirs(directory)
         
         for j in range(len(pensum_courses)):
-            
-            directory2 = f"{directory_name}/{todosPeriodos[i]}/{cursos[pensum_courses[j]][1]}"
+
+            directory2 = f"{directory_name}/{todosPeriodos[i]}/{pensum_courses[j]}"
 
             if not os.path.exists(directory2):
                 os.makedirs(directory2)
@@ -270,8 +269,6 @@ def Retiros (path, original_path, desired_program, directory_name):
     for i in range(len(estudiantes_totales)):
         result_list_estudiantes.append(estudiantes_totales[i]/divisor)
         result_list_avance.append(avance_general[i]/divisor)
-
-    breakpoint()
 
     missing_values = [0, 0, 0, 0]
     o = missing_values + retiros_totales
@@ -678,3 +675,8 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
     plt.cla()
     plt.close() 
 
+cursos_excelPath = "Data/Cursos IBIO 2018-2023.xlsx"
+desired_program = 'INGENIERIA BIOMEDICA'
+directory_name = 'PieCharts_por_Materia' #Nombre de la carpeta donde queremos que se guarden los resultados
+
+mainMaterias(cursos_excelPath, desired_program, directory_name)
