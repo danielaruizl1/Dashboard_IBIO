@@ -393,7 +393,7 @@ def plot_avance_cohortes(xlsx_cursos, results, directory_name, desired_program):
             colors2 = [group_colors_2[group] for group in results[anio]]
             plt.pie(results[anio].values(), autopct=lambda x: f'{int(round(x/100.0*sum(results[anio].values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':18}, explode=[0.05] * len(results[anio]))
             plt.title(f'Avance de los estudiantes ingresados en {anio}\n para el periodo {todosPeriodos[i]}', fontdict={'fontsize':22, 'weight': 'bold'})
-            plt.legend(results[anio].keys())
+            legend = plt.legend(results[anio].keys(), prop={'size': 14})
             directory = f'{directory_name}/{todosPeriodos[i]}'
             if not os.path.exists(directory):
                 os.makedirs(directory)

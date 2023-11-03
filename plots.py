@@ -25,7 +25,9 @@ def piecharts_por_materia (counts, cursos, pensum_courses, todosPeriodos, i, j,d
                     textprops={'fontsize': 18}, explode = explode_list)
     ax.set_title(f'{cursos[pensum_courses[j]][1]}{" "}{todosPeriodos[i]}{0}', fontsize=24, fontweight='bold')
     handles = [mpatches.Patch(color=color, label=label) for label, color in group_colors.items()]
-    ax.legend(handles=handles, loc='upper right')
+    legend = ax.legend(handles=handles, loc='upper right', prop={'size': 14})
+    for text in legend.get_texts():
+        text.set_fontsize(14)  
     plt.savefig(f'{directory2}/piechart_{pensum_courses[j]}.png')
     plt.cla()
     plt.close()
