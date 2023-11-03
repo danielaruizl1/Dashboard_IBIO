@@ -23,7 +23,7 @@ def piecharts_por_materia (counts, cursos, pensum_courses, todosPeriodos, i, j,d
     fig, ax = plt.subplots()
     wedges, labels, _ = ax.pie(counts, colors =colors,autopct=lambda x: f'{int(round(x/100.0*sum(counts)))} ({x:.1f}%)', 
                     textprops={'fontsize': 13}, explode = explode_list)
-    ax.set_title(f'{pensum_courses[j]}{" "}{todosPeriodos[i]}{0}', fontsize=16)
+    ax.set_title(f'{cursos[pensum_courses[j]][1]}{" "}{todosPeriodos[i]}{0}', fontsize=16)
     handles = [mpatches.Patch(color=color, label=label) for label, color in group_colors.items()]
     ax.legend(handles=handles, loc='upper right')
     plt.savefig(f'{directory2}/piechart_{pensum_courses[j]}.png')

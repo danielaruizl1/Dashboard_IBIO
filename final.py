@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 def load_cursos_obligatorios():
 
-    with open("cursos_obligatorios.json") as json_file:
+    with open("cursos_obligatorios.json", "r", encoding='utf-8') as json_file:
         cursos = json.load(json_file)
 
     return cursos
@@ -76,7 +76,7 @@ def mainMaterias(path, desired_program, directory_name):
         
         for j in range(len(pensum_courses)):
 
-            directory2 = f"{directory_name}/{todosPeriodos[i]}/{pensum_courses[j]}"
+            directory2 = f"{directory_name}/{todosPeriodos[i]}/{cursos[pensum_courses[j]][1]}"
 
             if not os.path.exists(directory2):
                 os.makedirs(directory2)
@@ -674,9 +674,3 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
 
     plt.cla()
     plt.close() 
-
-cursos_excelPath = "Data/Cursos IBIO 2018-2023.xlsx"
-desired_program = 'INGENIERIA BIOMEDICA'
-directory_name = 'PieCharts_por_Materia' #Nombre de la carpeta donde queremos que se guarden los resultados
-
-mainMaterias(cursos_excelPath, desired_program, directory_name)
