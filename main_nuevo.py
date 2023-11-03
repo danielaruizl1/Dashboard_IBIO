@@ -159,7 +159,7 @@ for i in range(len(todosPeriodos)):
         explode_list = [explode] * len(counts)
 
         fig, ax = plt.subplots()
-        plt.style.use('seaborn')
+        plt.style.use('ggplot')
         wedges, labels, _ = ax.pie(counts, colors =colors,autopct=lambda x: f'{int(round(x/100.0*sum(counts)))} ({x:.1f}%)', 
             textprops={'fontsize': 13}, explode = explode_list)
         ax.set_title(f'{cursos[pensum_courses[j]][1]}{" "}{todosPeriodos[i]}{0}', fontsize=16)
@@ -267,7 +267,7 @@ for i in range(len(todosPeriodos)):
     # plot a pie chart with the counts
     for anio in results:
         plt.figure()
-        plt.style.use('seaborn')
+        plt.style.use('ggplot')
         colors2 = [group_colors_2[group] for group in results[anio]]
         plt.pie(results[anio].values(), autopct=lambda x: f'{int(round(x/100.0*sum(results[anio].values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(results[anio]))
         plt.title(f'Avance de los estudiantes ingresados en {anio} para el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
@@ -283,7 +283,7 @@ for i in range(len(todosPeriodos)):
     
     all_cohortes = {key: value for key, value in all_cohortes.items() if value != 0}
     plt.figure()
-    plt.style.use('seaborn')
+    plt.style.use('ggplot')
     colors2 = [group_colors_2[group] for group in all_cohortes]
     plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
     plt.title(f'Avance de todos los estudiantes en el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})

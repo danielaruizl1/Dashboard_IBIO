@@ -387,11 +387,12 @@ def plot_avance_cohortes(xlsx_cursos, results, directory_name, desired_program):
 
         # plot a pie chart with the counts
         for anio in results:
-            plt.figure()
 
+            plt.figure(figsize=(10, 10))
+            plt.style.use('ggplot')
             colors2 = [group_colors_2[group] for group in results[anio]]
-            plt.pie(results[anio].values(), autopct=lambda x: f'{int(round(x/100.0*sum(results[anio].values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(results[anio]))
-            plt.title(f'Avance de los estudiantes ingresados en {anio} para el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
+            plt.pie(results[anio].values(), autopct=lambda x: f'{int(round(x/100.0*sum(results[anio].values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':18}, explode=[0.05] * len(results[anio]))
+            plt.title(f'Avance de los estudiantes ingresados en {anio}\n para el periodo {todosPeriodos[i]}', fontdict={'fontsize':22, 'weight': 'bold'})
             plt.legend(results[anio].keys())
             directory = f'{directory_name}/{todosPeriodos[i]}'
             if not os.path.exists(directory):
@@ -407,7 +408,7 @@ def plot_avance_cohortes(xlsx_cursos, results, directory_name, desired_program):
         
         all_cohortes = {key: value for key, value in all_cohortes.items() if value != 0}
         plt.figure()
-
+        plt.style.use('ggplot')
         colors2 = [group_colors_2[group] for group in all_cohortes]
         plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
         plt.title(f'Avance de todos los estudiantes en el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
@@ -500,6 +501,7 @@ def plot_n_cohortes(xlsx_cursos, n_dataframe, mean_n_hist, directory, desired_pr
 
     for periodo in todosPeriodos:
         plt.figure(figsize=(10,7.5))
+        plt.style.use('ggplot')
         lim=sum([not np.isnan(n_dataframe.loc[periodo][x]) for x in range(11)])
         x_list=range(1,lim+1)
         n_list=n_dataframe.loc[periodo][:lim]
@@ -518,6 +520,7 @@ def plot_n_cohortes(xlsx_cursos, n_dataframe, mean_n_hist, directory, desired_pr
     # Gráfica de N para todas las cohortes juntas
 
     plt.figure(figsize=(10,7.5))
+    plt.style.use('ggplot')
     colors_list=["maroon","firebrick","red","orange","gold","yellow","greenyellow","limegreen","green","darkgreen","darkslategray"]
 
     for i in range(len(todosPeriodos)):
@@ -570,6 +573,7 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
     
     for periodo in todosPeriodos:
         plt.figure(figsize=(10,7.5))
+        plt.style.use('ggplot')
         lim=sum([not np.isnan(mean_dataframe.loc[periodo][x]) for x in range(11)])
         x_list=range(1,lim+1)
         y_list=mean_dataframe.loc[periodo][:lim]
@@ -591,6 +595,7 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
     # Grafica de avance para todas las cohortes juntas
 
     plt.figure(figsize=(10,7.5))
+    plt.style.use('ggplot')
     colors_list=list(mcolors.TABLEAU_COLORS.values())
     colors_list.append('#000000')
 
@@ -634,6 +639,7 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
         os.makedirs(directory)
 
     plt.figure(figsize=(10,7.5))
+    plt.style.use('ggplot')
     x_list=range(1,10)
     plt.axhline(y=0, color="black", linewidth=0.8, linestyle='--')
     plt.plot(x_list, mean_avance_hist[:9], 'o--', linewidth=0.8, label="Avance promedio histórico")
@@ -662,6 +668,7 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
                 n_sancionados.loc[int(sheet_name)]+=1
 
     plt.figure(figsize=(10,7.5))
+    plt.style.use('ggplot')
     x_list=range(1,12)
     plt.plot(x_list, mean_n_hist, 'o--', linewidth=0.8, label="N histórico", color="black")
     plt.plot(x_list, list(n_sancionados.T.loc[0]), 'o--', linewidth=0.8, label="Número de estudiantes", color="red")
