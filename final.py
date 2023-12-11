@@ -188,7 +188,22 @@ def Retiros (path, original_path, desired_program, directory_name):
 
     filtered_df = excel_retiros[excel_retiros['Materia'].isin(pensum_courses)]
 
-    retiros_count = {materia: {periodo[:5]: count for periodo, count in filtered_df[filtered_df['Materia'] == materia]['Periodo'].value_counts().items()} for materia in filtered_df['Materia'].unique()}
+    #retiros_count = {materia: {periodo[:5]: count for periodo, count in filtered_df[filtered_df['Materia'] == materia]['Periodo'].value_counts().items()} for materia in filtered_df['Materia'].unique()}
+
+    retiros_count = {}
+
+    unique_materias = filtered_df['Materia'].unique()
+
+    for materia in unique_materias:
+        retiros_count[materia] = {}
+        
+        materia_data = filtered_df[filtered_df['Materia'] == materia]
+        materia_data['Periodo'] = materia_data['Periodo'].astype(str)
+
+        periodos_counts = materia_data['Periodo'].value_counts().items()
+        
+        for periodo, count in periodos_counts:
+            retiros_count[materia][periodo[:5]] = count
 
     xlsx = pd.read_excel(original_path)
 
@@ -596,8 +611,9 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
 
     plt.figure(figsize=(10,7.5))
     plt.style.use('ggplot')
-    colors_list=list(mcolors.TABLEAU_COLORS.values())
-    colors_list.append('#000000')
+    tableau_colors=list(mcolors.TABLEAU_COLORS.values())
+    additional_colors = ['cyan', 'magenta', 'yellow', 'black']
+    colors_list = tableau_colors + additional_colors[:12 - len(tableau_colors)]
 
     for i in range(len(todosPeriodos)):
         lim=sum([not np.isnan(mean_dataframe.loc[todosPeriodos[i]][x]) for x in range(11)])

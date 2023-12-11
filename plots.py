@@ -68,7 +68,7 @@ def comparacionNivelPlot (directory_name,y,x_list, n_est, max_n, pensum_courses,
     plt.xlabel('Semestre', fontsize=14)
     plt.ylabel('Número de estudiantes', fontsize=14)
     ax1.set_ylim([0,max_n+5])
-    ax1.text(1,86,f'{" Avance "}{pensum_courses[i]}{": "}{round(np.mean(y),3)}\n{" Avance Nivel "}{nivel_materia}{": "}{round(np.mean(y_nivel),3)}\n\n{" Estudiantes promedio: "}{round(np.mean(n_est),3)}', fontsize=12, ha='center', va='center',
+    ax1.text(1,157,f'{" Avance "}{pensum_courses[i]}{": "}{round(np.mean(y),3)}\n{" Avance Nivel "}{nivel_materia}{": "}{round(np.mean(y_nivel),3)}\n\n{" Estudiantes promedio: "}{round(np.mean(n_est),3)}', fontsize=12, ha='center', va='center',
             bbox=dict(boxstyle='square', facecolor='white', alpha=0.5))
     ax2 = ax1.twinx()
     ax2.plot(x_list,y,'--o', label=f'{pensum_courses[i]}',linewidth=0.8, color='red')
@@ -78,7 +78,7 @@ def comparacionNivelPlot (directory_name,y,x_list, n_est, max_n, pensum_courses,
     ax2.set_ylim([media_min-0.1,media_max+0.15])
     ax2.axhline(y=0, linestyle='dotted', color='blue')
     plt.title(f'{pensum_courses[i]}{" "}{cursos[pensum_courses[i]][1]}', fontsize=20, fontdict={'fontweight': 'bold'})
-    plt.legend()
+    plt.legend(loc='upper right')
     plt.savefig(f'{directory_name}/Materias/{pensum_courses[i]}/barplot_{pensum_courses[i]}.png')
     plt.cla()
     plt.close()
@@ -103,7 +103,7 @@ def retiros_plot(y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x
     plt.xlabel('Semestre', fontsize=14)
     plt.ylabel('Número de estudiantes', fontsize=14)
     ax1.set_ylim([0,max_n+10])
-    ax1.text(1,86,f'{" Avance "}{pensum_courses[i]}{": "}{round(np.mean(y),3)}\n{" Avance Nivel "}{nivel_materia}{": "}{round(np.mean(y_nivel),3)}\n\n{" Estudiantes promedio: "}{round(np.mean(n_est),3)}', fontsize=10, ha='center', va='center',
+    ax1.text(1,167,f'{" Avance "}{pensum_courses[i]}{": "}{round(np.mean(y),3)}\n{" Avance Nivel "}{nivel_materia}{": "}{round(np.mean(y_nivel),3)}\n\n{" Estudiantes promedio: "}{round(np.mean(n_est),3)}', fontsize=10, ha='center', va='center',
             bbox=dict(boxstyle='square', facecolor='white', alpha=0.5))
     ax2 = ax1.twinx()
     ax2.plot(x_list,y,'--o', label=f'{pensum_courses[i]}',linewidth=0.8, color='red')
@@ -113,7 +113,7 @@ def retiros_plot(y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x
     ax2.set_ylim([media_min-0.1,media_max+0.15])
     ax2.axhline(y=0, linestyle='dotted', color='blue')
     plt.title(f'{pensum_courses[i]}{" "}{cursos[pensum_courses[i]][1]}', fontsize=20, fontdict={'fontweight': 'bold'})
-    plt.legend()
+    plt.legend(loc='upper right')
     plt.savefig(f'{directory_name}/Materias/{pensum_courses[i]}/retiros_barplot_{pensum_courses[i]}.png', bbox_inches='tight')
     plt.cla()
     plt.close()
@@ -136,7 +136,7 @@ def retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_
     plt.xlabel('Semestre', fontsize=14)
     plt.ylabel('Número de estudiantes', fontsize=14)
     ax1.set_ylim([0,max_n+10])
-    ax1.text(1,86,f'{" Avance "}{pensum_courses[i]}{": "}{round(np.mean(y),3)}\n{" Avance Nivel "}{nivel_materia}{": "}{round(np.mean(y_nivel),3)}\n\n{" Estudiantes promedio: "}{round(np.mean(n_est),3)}', fontsize=10, ha='center', va='center',
+    ax1.text(1,167,f'{" Avance "}{pensum_courses[i]}{": "}{round(np.mean(y),3)}\n{" Avance Nivel "}{nivel_materia}{": "}{round(np.mean(y_nivel),3)}\n\n{" Estudiantes promedio: "}{round(np.mean(n_est),3)}', fontsize=10, ha='center', va='center',
             bbox=dict(boxstyle='square', facecolor='white', alpha=0.5))
     ax2 = ax1.twinx()
     ax2.plot(x_list,y,'--o', label=f'{pensum_courses[i]}',linewidth=0.8, color='red')
@@ -146,7 +146,7 @@ def retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_
     ax2.set_ylim([media_min-0.1,media_max+0.15])
     ax2.axhline(y=0, linestyle='dotted', color='blue')
     plt.title(f'{pensum_courses[i]}{" "}{cursos[pensum_courses[i]][1]}', fontsize=20, fontdict={'fontweight': 'bold'})
-    plt.legend()
+    plt.legend(loc='upper right')
     plt.savefig(f'{directory_name}/Materias/{pensum_courses[i]}/retiros_barplot_{pensum_courses[i]}_resumida.png', bbox_inches='tight')
     plt.cla()
     plt.close()
