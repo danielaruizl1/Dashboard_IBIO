@@ -292,8 +292,8 @@ def Retiros (path, original_path, desired_program, directory_name):
 
     graficaSumaRetiros(semestres, sum_list, retiros_x, retiros_totales, result_list_avance, directory_name)
 
-def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
-    
+def avance_cohortes(xlsx_cursos, xlsx_sancionados, directory_name, desired_program):
+   
     cursos = load_cursos_obligatorios()
     pensum_courses = list(cursos.keys())     
     xlsx = pd.read_excel(xlsx_cursos)
@@ -311,8 +311,8 @@ def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
     sancionados_dict={}
     mean_sancionados=pd.DataFrame()
     desv_sancionados=pd.DataFrame()
-
-    for i in range(len(todosPeriodos)):
+    
+    for i in tqdm(range(len(todosPeriodos)), desc="Processing Periods"):
 
         condicion_periodo = solo_IBIO['Periodo']==todosPeriodos[i]
         df_periodo=solo_IBIO[condicion_periodo]
@@ -359,6 +359,8 @@ def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
             for zero_key in zero_values:
                 del results[cohorte][zero_key]
 
+            plot_avance_cohortes(todosPeriodos[i], results, directory_name)
+
         #Stadisticas cohorte
 
         for periodo in cohortes_dict:
@@ -379,58 +381,49 @@ def avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program):
 
     return mean_dataframe, desv_dataframe, results, mean_sancionados, desv_sancionados, sancionados_dict
 
-def plot_avance_cohortes(xlsx_cursos, results, directory_name, desired_program):
+def plot_avance_cohortes(period, results, directory_name):
 
-    cursos = load_cursos_obligatorios()
-    pensum_courses = list(cursos.keys())     
-    xlsx = pd.read_excel(xlsx_cursos)
-    mask = xlsx['Programa principal'] == desired_program
-    solo_IBIO = soloIBIO_df(xlsx, mask)
-    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
+    group_colors_2 = {
+    '>3': '#d3554c',
+    '3-2': '#fc6c64',
+    '2-1': '#feb268',
+    '1-0': '#f7e16a',
+    '0-1': '#ffe9af',
+    '-1-2': '#d3e1a2',
+    '-2-3': '#a9e070',
+    }
 
-    for i in range(len(todosPeriodos)):
+    # plot a pie chart with the counts
+    for anio in results:
 
-        group_colors_2 = {
-        '>3': '#d3554c',
-        '3-2': '#fc6c64',
-        '2-1': '#feb268',
-        '1-0': '#f7e16a',
-        '0-1': '#ffe9af',
-        '-1-2': '#d3e1a2',
-        '-2-3': '#a9e070',
-        }
-
-        # plot a pie chart with the counts
-        for anio in results:
-
-            plt.figure(figsize=(10, 10))
-            plt.style.use('ggplot')
-            colors2 = [group_colors_2[group] for group in results[anio]]
-            plt.pie(results[anio].values(), autopct=lambda x: f'{int(round(x/100.0*sum(results[anio].values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':18}, explode=[0.05] * len(results[anio]))
-            plt.title(f'Avance de los estudiantes ingresados en {anio}\n para el periodo {todosPeriodos[i]}', fontdict={'fontsize':22, 'weight': 'bold'})
-            legend = plt.legend(results[anio].keys(), prop={'size': 14})
-            directory = f'{directory_name}/{todosPeriodos[i]}'
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            plt.savefig(f'{directory}/piechart_{str(anio)}.png')
-            plt.cla()
-            plt.close()
-
-        all_cohortes = {">3":0,"3-2":0,"2-1":0,"1-0":0,"0-1":0,"-1-2":0,"-2-3":0}
-        for anio in results:
-            for key in results[anio]:
-                all_cohortes[key]+=results[anio][key]
-        
-        all_cohortes = {key: value for key, value in all_cohortes.items() if value != 0}
-        plt.figure()
+        plt.figure(figsize=(10, 10))
         plt.style.use('ggplot')
-        colors2 = [group_colors_2[group] for group in all_cohortes]
-        plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
-        plt.title(f'Avance de todos los estudiantes en el periodo {todosPeriodos[i]}', fontdict={'fontsize':14, 'weight': 'bold'})
-        plt.legend(all_cohortes.keys())
-        plt.savefig(f'{directory}/piechart_all_cohortes.png')
+        colors2 = [group_colors_2[group] for group in results[anio]]
+        plt.pie(results[anio].values(), autopct=lambda x: f'{int(round(x/100.0*sum(results[anio].values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':18}, explode=[0.05] * len(results[anio]))
+        plt.title(f'Avance de los estudiantes ingresados en {anio}\n para el periodo {period}', fontdict={'fontsize':22, 'weight': 'bold'})
+        legend = plt.legend(results[anio].keys(), prop={'size': 14})
+        directory = f'{directory_name}/{period}'
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        plt.savefig(f'{directory}/piechart_{str(anio)}.png')
         plt.cla()
         plt.close()
+
+    all_cohortes = {">3":0,"3-2":0,"2-1":0,"1-0":0,"0-1":0,"-1-2":0,"-2-3":0}
+    for anio in results:
+        for key in results[anio]:
+            all_cohortes[key]+=results[anio][key]
+    
+    all_cohortes = {key: value for key, value in all_cohortes.items() if value != 0}
+    plt.figure(figsize=(10, 10))
+    plt.style.use('ggplot')
+    colors2 = [group_colors_2[group] for group in all_cohortes]
+    plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
+    plt.title(f'Avance de todos los estudiantes en el periodo {period}', fontdict={'fontsize':22, 'weight': 'bold'})
+    plt.legend(all_cohortes.keys())
+    plt.savefig(f'{directory}/piechart_all_cohortes.png')
+    plt.cla()
+    plt.close()
     
 
 def todosIBIO(xlsx):
