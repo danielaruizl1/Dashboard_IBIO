@@ -633,6 +633,7 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
 
 def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_estudiantes):
     
+    breakpoint()
     _, _, _, mean_sancionados, desv_sancionados, sancionados_dict = avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program)
     n_dataframe, mean_n_hist, n_sancionados = n_estudiantes(xlsx_cursos, xlsx_sancionados, xlsx_estudiantes, desired_program)
     mean_avance_hist = historico_cohortes(xlsx_cursos, xlsx_sancionados, desired_program)
@@ -695,4 +696,3 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
 
     plt.cla()
     plt.close() 
-
