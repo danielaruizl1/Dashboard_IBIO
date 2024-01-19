@@ -633,7 +633,6 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
 
 def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_estudiantes):
     
-    breakpoint()
     _, _, _, mean_sancionados, desv_sancionados, sancionados_dict = avance_cohortes(xlsx_cursos, xlsx_sancionados, desired_program)
     n_dataframe, mean_n_hist, n_sancionados = n_estudiantes(xlsx_cursos, xlsx_sancionados, xlsx_estudiantes, desired_program)
     mean_avance_hist = historico_cohortes(xlsx_cursos, xlsx_sancionados, desired_program)
@@ -657,7 +656,7 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
     plt.style.use('ggplot')
     x_list=range(1,10)
     plt.axhline(y=0, color="black", linewidth=0.8, linestyle='--')
-    plt.plot(x_list, mean_avance_hist[:9], 'o--', linewidth=0.8, label="Avance promedio histórico")
+    plt.plot(x_list, mean_avance_hist[:9], 'o--', linewidth=0.8, label="Avance promedio histórico", color="black")
     plt.errorbar(x_list, mean_sancionados_list, yerr=desv_sancionados_list, color='red', linewidth=0.8, fmt='o--', ecolor='black', label="Avance promedio sancionados")
     plt.ylim((-1,5))
     plt.xticks(x_list)
@@ -684,9 +683,9 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados, xlsx_
 
     plt.figure(figsize=(10,7.5))
     plt.style.use('ggplot')
-    x_list=range(1,12)
+    x_list=range(1,13)
     plt.plot(x_list, mean_n_hist, 'o--', linewidth=0.8, label="N histórico", color="black")
-    plt.plot(x_list, list(n_sancionados.T.loc[0]), 'o--', linewidth=0.8, label="Número de estudiantes", color="red")
+    plt.plot(x_list, list(n_sancionados.T.loc[0]), 'o--', linewidth=0.8, label="N sancionados", color="red")
     plt.xlabel('Semestre',fontsize=14)
     plt.ylabel('Número de estudiantes',fontsize=14)
     plt.title(f"Estudiantes sancionados",fontsize=18)
