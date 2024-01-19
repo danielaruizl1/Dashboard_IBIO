@@ -534,7 +534,7 @@ def plot_n_cohortes(xlsx_cursos, n_dataframe, mean_n_hist, directory, desired_pr
 
     plt.figure(figsize=(10,7.5))
     plt.style.use('ggplot')
-    colors_list=["maroon","firebrick","red","orange","gold","yellow","greenyellow","limegreen","green","darkgreen","darkslategray"]
+    colors_list=["maroon","firebrick","red","orange","gold","yellow","greenyellow","limegreen","green","darkgreen","darkslategray","darkcyan"]
 
     for i in range(len(todosPeriodos)):
         lim=sum([not np.isnan(n_dataframe.loc[todosPeriodos[i]][x]) for x in range(len(todosPeriodos))])
@@ -542,8 +542,8 @@ def plot_n_cohortes(xlsx_cursos, n_dataframe, mean_n_hist, directory, desired_pr
         n_list=n_dataframe.loc[todosPeriodos[i]][:lim]
         plt.plot(x_list, n_list, 'o--', linewidth=0.8, label=todosPeriodos[i], color=colors_list[i])
 
-    plt.plot(range(1,12), mean_n_hist, 'o--', linewidth=0.8, label="N histórico",color="black")
-    plt.xticks(range(1,12))
+    plt.plot(range(1,13), mean_n_hist, 'o--', linewidth=0.8, label="N histórico",color="black")
+    plt.xticks(range(1,13))
     plt.xlabel('Semestre',fontsize=14)
     plt.ylabel('Número de estudiantes',fontsize=14)
     plt.legend(fontsize=12, loc=1)
@@ -624,7 +624,7 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
     plt.xlabel('Semestre',fontsize=14)
     plt.ylabel('Avance Promedio',fontsize=14)
     plt.legend(fontsize=12, loc=2)
-    plt.xticks(range(1,12))
+    plt.xticks(range(1,13))
     plt.title(f"Avance promedio por cohorte",fontsize=18)
     plt.savefig(f'{directory}/cohortes_avance.png')
     plt.cla()
