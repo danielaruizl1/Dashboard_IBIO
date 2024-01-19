@@ -119,7 +119,7 @@ def medianNivel (results_dict):
 
 
 def retirosPorMateria (pensum_courses, results_dict, medias_niveles, retiros_count, max_n, media_min, media_max, cursos, directory_name):
-
+    
     list_dict_estudiantes = []
     list_dict_retiros = []
     list_dict_avance = []

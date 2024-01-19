@@ -85,9 +85,14 @@ def comparacionNivelPlot (directory_name,y,x_list, n_est, max_n, pensum_courses,
 
 
 def retiros_plot(y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x_nivel, y_nivel, nivel_materia, media_min, media_max, cursos, i, directory_name):
-
+    plt.style.use('ggplot')
     fig, ax1 = plt.subplots(figsize=(12, 8))
+
+    if '20241' not in x_list:
+        x_list.append('20241')
+   
     x_pos = [i for i, _ in enumerate(x_list)]
+
 
     result_total = []
 
@@ -120,7 +125,7 @@ def retiros_plot(y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x
 
 
 def retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x_nivel, y_nivel, nivel_materia, media_min, media_max, cursos, i, directory_name):
-
+    plt.style.use('ggplot')
     fig, ax1 = plt.subplots(figsize=(12, 8))
     x_pos = [i for i, _ in enumerate(x_list)]
 
@@ -153,7 +158,7 @@ def retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_
 
 
 def graficaSumaRetiros(semestres, sum_list, retiros_x, retiros_totales, result_list_avance, directory):
-
+    plt.style.use('ggplot')
     fig, ax1 = plt.subplots(figsize=(12, 8))
     ax1.bar(semestres, sum_list, color="cornflowerblue", width=0.5, label='Estudiantes totales')
     ax1.bar(retiros_x, retiros_totales, color="salmon", width=0.5, label='Retiros')
