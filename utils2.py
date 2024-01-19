@@ -66,10 +66,11 @@ def Avance(row):
     
 
 def fill_results_dict(pensum_courses, solo_IBIO):
-
+    
     results_dict = {}
 
     for i in range(len(pensum_courses)):
+
         materia_df = solo_IBIO[solo_IBIO['Materia'] == pensum_courses[i]]
         materia_df = materia_df.reset_index()
         unique_periods = materia_df['Periodo'].unique()

@@ -34,7 +34,7 @@ def piecharts_por_materia (counts, cursos, pensum_courses, todosPeriodos, i, j,d
 
 
 def std_dev_plot (results_dict, pensum_courses, min_value, max_mean, max_desv, cursos, i, directory_name):
-
+    plt.style.use('ggplot')
     x = list(results_dict[pensum_courses[i]].keys())
     x_list = [str(i) for i in x]
     y = [results_dict[pensum_courses[i]][year]['mean'] for year in x]
@@ -60,7 +60,7 @@ def std_dev_plot (results_dict, pensum_courses, min_value, max_mean, max_desv, c
 
 
 def comparacionNivelPlot (directory_name,y,x_list, n_est, max_n, pensum_courses,i,x_nivel,y_nivel, nivel_materia,media_min, media_max, cursos):
-
+    plt.style.use('ggplot')
     fig, ax1 = plt.subplots(figsize=(12, 8))
 
     ax1.bar(x_list, n_est, color="skyblue")
@@ -87,12 +87,7 @@ def comparacionNivelPlot (directory_name,y,x_list, n_est, max_n, pensum_courses,
 def retiros_plot(y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x_nivel, y_nivel, nivel_materia, media_min, media_max, cursos, i, directory_name):
     plt.style.use('ggplot')
     fig, ax1 = plt.subplots(figsize=(12, 8))
-
-    if '20241' not in x_list:
-        x_list.append('20241')
-   
     x_pos = [i for i, _ in enumerate(x_list)]
-
 
     result_total = []
 
