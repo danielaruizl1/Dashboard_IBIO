@@ -181,6 +181,40 @@ def comparacionNivel (results_dict, max_n, media_min, media_max, directory_name)
 
         comparacionNivelPlot(directory_name, y,x_list, n_est, max_n, pensum_courses,i,x_nivel,y_nivel, nivel_materia,media_min, media_max, cursos)
 
+def estudiantes_totales(xlsx_totales_unicos, directory_name):
+
+    df = pd.read_excel(xlsx_totales_unicos)
+
+    # Crear la figura y el eje
+    plt.style.use('ggplot')
+    fig, ax1 = plt.subplots(figsize=(12, 8))
+
+    # Convertir semestres a string
+    semestres = [str(semestre) for semestre in df['Periodo']]
+
+    # Ancho de cada barra
+    bar_width = 0.4
+
+    # Posiciones de las barras
+    r1 = np.arange(len(semestres))
+    r2 = [x + bar_width for x in r1]
+
+    # Trazar las barras
+    ax1.set_xlabel('Semestre')
+    ax1.set_ylabel('Número de estudiantes')
+    ax1.bar(r1, df['Total Estudiantes IBIO'], color="cornflowerblue", width=bar_width, label='Estudiantes IBIO')
+    ax1.bar(r2, df['Total Estudiantes'], color="darkblue", width=bar_width, label='Estudiantes totales')
+
+    # Añadir leyendas y título
+    ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), fancybox=True, shadow=True, ncol=5)
+    plt.title('ESTUDIANTES UNICOS TOTALES POR PERIODOS', fontsize=20, fontdict={'fontweight': 'bold'})
+
+    # Configurar las marcas del eje x para que aparezcan en el centro de los grupos de barras
+    ax1.set_xticks([r + bar_width / 2 for r in range(len(r1))])
+    ax1.set_xticklabels(semestres)
+
+    # Mostrar gráfica
+    plt.savefig(f'{directory_name}/estudiantes_totales.png')
 
 def Retiros (path, original_path, desired_program, directory_name):
 
