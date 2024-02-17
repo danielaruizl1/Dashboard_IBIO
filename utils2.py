@@ -118,20 +118,37 @@ def medianNivel (results_dict):
 
     return medias_niveles
 
+def get_year(key):
 
-def retirosPorMateria (pensum_courses, results_dict, medias_niveles, retiros_count, max_n, media_min, media_max, cursos, directory_name):
+    return int(str(key)[:5])
+
+def retirosPorMateria (pensum_courses, results_dict, medias_niveles, retiros_count, max_n, media_min, media_max, cursos, directory_name, todosPeriodos):
     
     list_dict_estudiantes = []
     list_dict_retiros = []
     list_dict_avance = []
 
     
+
+    # Create an empty dictionary to store the sorted results
+    sorted_results_dict = {}
+
+    periodos = todosPeriodos.tolist()
+    # Iterate through each key in results_dict
+
+    for subject_code in results_dict:
+        # Sort the sub-dictionary based on the order of years
+        sorted_keys = sorted(results_dict[subject_code].keys(), key=lambda x: periodos.index(x))
+        sorted_sub_dict = {sub_key: results_dict[subject_code][sub_key] for sub_key in sorted_keys}
+        sorted_results_dict[subject_code] = sorted_sub_dict
+
+
     for i in range(len(pensum_courses)):
 
-        x = list(results_dict[pensum_courses[i]].keys())
+        x = list(sorted_results_dict[pensum_courses[i]].keys())
         x_list = [str(i) for i in x]
-        y = [results_dict[pensum_courses[i]][year]['mean'] for year in x]
-        n_est = [results_dict[pensum_courses[i]][year]['n'] for year in x]
+        y = [sorted_results_dict[pensum_courses[i]][year]['mean'] for year in x]
+        n_est = [sorted_results_dict[pensum_courses[i]][year]['n'] for year in x]
         
         
         my_dict_avance = dict(zip(x_list, y))
