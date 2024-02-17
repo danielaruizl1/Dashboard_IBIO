@@ -478,7 +478,7 @@ def plot_avance_cohortes(period, results, directory_name):
     plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
     plt.title(f'Avance de todos los estudiantes en el periodo {period}', fontdict={'fontsize':22, 'weight': 'bold'})
     plt.legend(all_cohortes.keys())
-    plt.savefig(f'{directory}/piechart_all_cohortes.png', transparent=True)
+    plt.savefig(f'{directory}/piechart_all_cohortes.png')
     plt.cla()
     plt.close()
     
@@ -578,7 +578,7 @@ def plot_n_cohortes(xlsx_cursos, n_dataframe, mean_n_hist, directory, desired_pr
         plt.ylabel('Número de estudiantes',fontsize=14)
         plt.legend(fontsize=12, loc=3)
         plt.title(f"Número de estudiantes cohorte {periodo}",fontsize=18)
-        plt.savefig(f'{directory}/{periodo}_n.png', transparent=True)
+        plt.savefig(f'{directory}/{periodo}_n.png')
         plt.cla()
         plt.close()
 
@@ -654,7 +654,7 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
         plt.legend(fontsize=12, loc=2)
         avance_prom=np.round(np.mean(y_list),2)
         plt.title(f"Cohorte {periodo} (AP={avance_prom})",fontsize=18)
-        plt.savefig(f'{directory}/{periodo}_avance.png', transparent=True)
+        plt.savefig(f'{directory}/{periodo}_avance.png')
         plt.cla()
         plt.close()
 
@@ -678,7 +678,7 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
     plt.legend(fontsize=12, loc=2)
     plt.xticks(range(1,len(todosPeriodos)+1))
     plt.title(f"Avance promedio por cohorte",fontsize=18)
-    plt.savefig(f'{directory}/cohortes_avance.png', transparent=True)
+    plt.savefig(f'{directory}/cohortes_avance.png')
     plt.cla()
     plt.close()
 
@@ -722,7 +722,7 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados):
     plt.legend(fontsize=12, loc=2)
     avance_prom=np.round(np.mean(mean_sancionados_list),2)
     plt.title(f"Sancionados (AP={avance_prom})",fontsize=18)
-    plt.savefig(f'{directory}/sancionados_avance.png', transparent=True)
+    plt.savefig(f'{directory}/sancionados_avance.png')
     plt.cla()
     plt.close()
 
@@ -736,7 +736,7 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados):
     plt.ylabel('Número de estudiantes',fontsize=14)
     plt.title(f"Estudiantes sancionados",fontsize=18)
     plt.xticks(rango, x_list, rotation=45)
-    plt.savefig(f'{directory}/sancionados_n.png', transparent=True)
+    plt.savefig(f'{directory}/sancionados_n.png')
 
     plt.cla()
     plt.close() 
@@ -764,7 +764,7 @@ def general_plots(xlsx_estudiantes, mean_avance_hist, mean_n_hist, directory_nam
     ax2.axhline(y=0, linestyle='dotted', color='blue')
     plt.title('GRÁFICA GENERAL POR SEMESTRES', fontsize=18, fontweight='bold')
     plt.legend()
-    plt.savefig(f'{directory_name}/grafica_general_semestre.png', bbox_inches='tight', transparent=True)
+    plt.savefig(f'{directory_name}/grafica_general_semestre.png', bbox_inches='tight')
     plt.cla()   
     plt.close()
 
