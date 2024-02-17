@@ -71,6 +71,9 @@ def mainMaterias(path, desired_program, directory_name):
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
 
+    result_df = pd.DataFrame(index=pensum_courses, columns=todosPeriodos, dtype=int)
+
+
     for i in tqdm(range(len(todosPeriodos)), desc="Processing Periods"):
 
         directory = f"{directory_name}/{todosPeriodos[i]}"
@@ -85,17 +88,32 @@ def mainMaterias(path, desired_program, directory_name):
             if not os.path.exists(directory2):
                 os.makedirs(directory2)
 
+
+            if todosPeriodos[i] == 20241:
+               
+               print("202410")
+              
+
             condition_materia = solo_IBIO['Materia']== pensum_courses[j]
 
             condition_anio = solo_IBIO['Periodo']== todosPeriodos[i]
 
             df_materia_anio = solo_IBIO.loc[condition_materia & condition_anio]
 
+            num_rows = df_materia_anio.shape[0]
+
+            # Save the number of rows in the result_df
+            result_df.at[pensum_courses[j], todosPeriodos[i]] = num_rows
+
             # count the number of values in each group
             counts = df_materia_anio['Group'].value_counts()
 
             piecharts_por_materia (counts, cursos, pensum_courses, todosPeriodos, i, j,directory2)
 
+  
+    # Save the result_df to an Excel file
+    excel_file_path = f"{directory_name}/students_counts.xlsx"
+    result_df.to_excel(excel_file_path)
 
 def avanceNivel(path, desired_program, directory_name):
 
@@ -181,44 +199,11 @@ def comparacionNivel (results_dict, max_n, media_min, media_max, directory_name)
 
         comparacionNivelPlot(directory_name, y,x_list, n_est, max_n, pensum_courses,i,x_nivel,y_nivel, nivel_materia,media_min, media_max, cursos)
 
-def estudiantes_totales(xlsx_totales_unicos, directory_name):
-
-    df = pd.read_excel(xlsx_totales_unicos)
-
-    # Crear la figura y el eje
-    plt.style.use('ggplot')
-    fig, ax1 = plt.subplots(figsize=(12, 8))
-
-    # Convertir semestres a string
-    semestres = [str(semestre) for semestre in df['Periodo']]
-
-    # Ancho de cada barra
-    bar_width = 0.4
-
-    # Posiciones de las barras
-    r1 = np.arange(len(semestres))
-    r2 = [x + bar_width for x in r1]
-
-    # Trazar las barras
-    ax1.set_xlabel('Semestre')
-    ax1.set_ylabel('Número de estudiantes')
-    ax1.bar(r1, df['Total Estudiantes IBIO'], color="cornflowerblue", width=bar_width, label='Estudiantes IBIO')
-    ax1.bar(r2, df['Total Estudiantes'], color="darkblue", width=bar_width, label='Estudiantes totales')
-
-    # Añadir leyendas y título
-    ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), fancybox=True, shadow=True, ncol=5)
-    plt.title('ESTUDIANTES UNICOS TOTALES POR PERIODOS', fontsize=20, fontdict={'fontweight': 'bold'})
-
-    # Configurar las marcas del eje x para que aparezcan en el centro de los grupos de barras
-    ax1.set_xticks([r + bar_width / 2 for r in range(len(r1))])
-    ax1.set_xticklabels(semestres)
-
-    # Mostrar gráfica
-    plt.savefig(f'{directory_name}/estudiantes_totales.png')
 
 def Retiros (path, original_path, desired_program, directory_name):
 
     excel_retiros = pd.read_excel(path)
+
 
     cursos = load_cursos_obligatorios()
 
@@ -253,13 +238,23 @@ def Retiros (path, original_path, desired_program, directory_name):
 
     results_dict = fill_results_dict (pensum_courses, solo_IBIO)
 
-    medias_niveles = medianNivel(results_dict)
+    periodos = todosPeriodos.tolist()
+    # Iterate through each key in results_dict
+    sorted_results_dict = {}
+
+    for subject_code in results_dict:
+        # Sort the sub-dictionary based on the order of years
+        sorted_keys = sorted(results_dict[subject_code].keys(), key=lambda x: periodos.index(x))
+        sorted_sub_dict = {sub_key: results_dict[subject_code][sub_key] for sub_key in sorted_keys}
+        sorted_results_dict[subject_code] = sorted_sub_dict
+
+    medias_niveles = medianNivel(sorted_results_dict)
 
     max_n = 0
     max_value, min_value = 0, 10
     media_max , media_min = 0,10
 
-    for course in results_dict.values():
+    for course in sorted_results_dict.values():
         for semester in course.values():
             if semester['n'] > max_n:
                 max_n = semester['n']
@@ -271,8 +266,8 @@ def Retiros (path, original_path, desired_program, directory_name):
                 max_value = semester['std_dev']+ semester['mean']
             if  semester['mean'] - semester['std_dev']< min_value:
                 min_value = semester['mean'] - semester['std_dev']
-                        
-    list_dict_retiros, list_dict_estudiantes, list_dict_avance = retirosPorMateria (pensum_courses, results_dict, medias_niveles, retiros_count, max_n, media_min, media_max, cursos, directory_name)
+    
+    list_dict_retiros, list_dict_estudiantes, list_dict_avance = retirosPorMateria (pensum_courses, results_dict, medias_niveles, retiros_count, max_n, media_min, media_max, cursos, directory_name, todosPeriodos)
 
     ## Retiros promedio
 
@@ -302,13 +297,19 @@ def Retiros (path, original_path, desired_program, directory_name):
             # add the value to the running total for this key
             accumulated_avance[key] = accumulated_avance.get(key, 0) + value
 
+  
+    semesters_ordered = sorted(accumulated_avance.keys(), key=lambda x: int(x))
+ 
+    accumulated_avance = {key: accumulated_avance[key] for key in semesters_ordered if key in accumulated_avance}
+    accumulated_retiros = {key: accumulated_retiros[key] for key in semesters_ordered if key in accumulated_retiros}
+    accumulated_estudiantes = {key: accumulated_estudiantes[key] for key in semesters_ordered if key in accumulated_estudiantes}
 
     estudiantes_totales = list(accumulated_estudiantes.values())
     retiros_totales = list(accumulated_retiros.values())
     retiros_x = list(accumulated_retiros.keys())
     avance_general = list(accumulated_avance.values())
     semestres = list(accumulated_avance.keys())
-
+ 
     divisor = len(pensum_courses)
 
     result_list_retiros = []
@@ -477,7 +478,7 @@ def plot_avance_cohortes(period, results, directory_name):
     plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
     plt.title(f'Avance de todos los estudiantes en el periodo {period}', fontdict={'fontsize':22, 'weight': 'bold'})
     plt.legend(all_cohortes.keys())
-    plt.savefig(f'{directory}/piechart_all_cohortes.png')
+    plt.savefig(f'{directory}/piechart_all_cohortes.png', transparent=True)
     plt.cla()
     plt.close()
     
@@ -577,7 +578,7 @@ def plot_n_cohortes(xlsx_cursos, n_dataframe, mean_n_hist, directory, desired_pr
         plt.ylabel('Número de estudiantes',fontsize=14)
         plt.legend(fontsize=12, loc=3)
         plt.title(f"Número de estudiantes cohorte {periodo}",fontsize=18)
-        plt.savefig(f'{directory}/{periodo}_n.png')
+        plt.savefig(f'{directory}/{periodo}_n.png', transparent=True)
         plt.cla()
         plt.close()
 
@@ -653,7 +654,7 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
         plt.legend(fontsize=12, loc=2)
         avance_prom=np.round(np.mean(y_list),2)
         plt.title(f"Cohorte {periodo} (AP={avance_prom})",fontsize=18)
-        plt.savefig(f'{directory}/{periodo}_avance.png')
+        plt.savefig(f'{directory}/{periodo}_avance.png', transparent=True)
         plt.cla()
         plt.close()
 
@@ -677,7 +678,7 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
     plt.legend(fontsize=12, loc=2)
     plt.xticks(range(1,len(todosPeriodos)+1))
     plt.title(f"Avance promedio por cohorte",fontsize=18)
-    plt.savefig(f'{directory}/cohortes_avance.png')
+    plt.savefig(f'{directory}/cohortes_avance.png', transparent=True)
     plt.cla()
     plt.close()
 
@@ -721,7 +722,7 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados):
     plt.legend(fontsize=12, loc=2)
     avance_prom=np.round(np.mean(mean_sancionados_list),2)
     plt.title(f"Sancionados (AP={avance_prom})",fontsize=18)
-    plt.savefig(f'{directory}/sancionados_avance.png')
+    plt.savefig(f'{directory}/sancionados_avance.png', transparent=True)
     plt.cla()
     plt.close()
 
@@ -735,7 +736,7 @@ def sancionados(xlsx_cursos, directory, desired_program, xlsx_sancionados):
     plt.ylabel('Número de estudiantes',fontsize=14)
     plt.title(f"Estudiantes sancionados",fontsize=18)
     plt.xticks(rango, x_list, rotation=45)
-    plt.savefig(f'{directory}/sancionados_n.png')
+    plt.savefig(f'{directory}/sancionados_n.png', transparent=True)
 
     plt.cla()
     plt.close() 
@@ -763,6 +764,7 @@ def general_plots(xlsx_estudiantes, mean_avance_hist, mean_n_hist, directory_nam
     ax2.axhline(y=0, linestyle='dotted', color='blue')
     plt.title('GRÁFICA GENERAL POR SEMESTRES', fontsize=18, fontweight='bold')
     plt.legend()
-    plt.savefig(f'{directory_name}/grafica_general_semestre.png', bbox_inches='tight')
+    plt.savefig(f'{directory_name}/grafica_general_semestre.png', bbox_inches='tight', transparent=True)
     plt.cla()   
     plt.close()
+
