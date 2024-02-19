@@ -155,7 +155,7 @@ def retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_
 def graficaSumaRetiros(semestres, sum_list, retiros_x, retiros_totales, result_list_avance, directory):
     plt.style.use('ggplot')
     fig, ax1 = plt.subplots(figsize=(12, 8))
-    ax1.bar(semestres, sum_list, color="cornflowerblue", width=0.5, label='Estudiantes totales')
+    ax1.bar(semestres, sum_list, color="cornflowerblue", width=0.5, label='Registros totales')
     ax1.bar(retiros_x, retiros_totales, color="salmon", width=0.5, label='Retiros')
     ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
             fancybox=True, shadow=True, ncol=5)
