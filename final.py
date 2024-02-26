@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as mcolors
-from utils2 import Avance, Semestre, assign_group, fill_results_dict, medianNivel, retirosPorMateria
+from utils2 import Avance, Semestre, assign_group, fill_results_dict, medianNivel, retirosPorMateria, assign_group2
 from plots import piecharts_por_materia, std_dev_plot, comparacionNivelPlot, graficaSumaRetiros, retiros_plot_resumido
 from tqdm import tqdm
 import warnings
@@ -768,3 +768,265 @@ def general_plots(xlsx_estudiantes, mean_avance_hist, mean_n_hist, directory_nam
     plt.cla()   
     plt.close()
 
+
+def estudiantesUnicosConAvance (original_path, desired_program, directory_name):
+
+    os.makedirs(directory_name, exist_ok=True)
+
+    cursos = load_cursos_obligatorios()
+
+    pensum_courses = list(cursos.keys())
+
+    xlsx = pd.read_excel(original_path)
+
+    mask = xlsx['Programa principal'] == desired_program
+
+    solo_IBIO = soloIBIO_df(xlsx, mask)
+
+    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
+
+    unique_df = solo_IBIO.groupby(['Código est', 'Periodo']).agg({'Avance': 'mean'}).reset_index()
+
+    unique_df['Group'] = unique_df['Avance'].apply(assign_group2)
+
+    period_counts = unique_df['Periodo'].value_counts().to_dict()
+
+    sorted_periods = sorted(period_counts.keys())
+    
+    sorted_period_counts = {period: period_counts[period] for period in sorted_periods}
+
+    group_counts = unique_df.groupby(['Periodo', 'Group']).size().unstack(fill_value=0)
+
+    group_colors = {
+    '>= +3': 'darkred',
+    '[+2, +3)': 'orangered',
+    '[+1, +2)': 'orange',
+    '[+0, +1)': 'gold',
+    '[-1, +0)': 'yellowgreen',
+    '[-2, -1)': 'green',
+    '<= -2': 'darkgreen',
+
+}
+    
+
+    plt.style.use('ggplot')
+    
+
+    fig, ax1 = plt.subplots(figsize=(14, 8))
+
+
+    x_pos = [i for i, _ in enumerate(todosPeriodos)]
+
+
+    ax1.bar([i - 0.0 for i in x_pos], sorted_period_counts.values(), color="cornflowerblue", width=0.38)
+    ax1.set_xticks(x_pos)
+    ax1.set_xticklabels(todosPeriodos)
+
+    ax2 = ax1.twinx()
+
+
+    for group in group_counts.columns:
+
+        color = group_colors.get(group, 'black') 
+
+        group_counts_list = group_counts[group].tolist()
+ 
+        ax2.plot(x_pos,  group_counts_list, label=group, color=color, linewidth=2)
+
+    max_y = max(ax1.get_ylim()[1], ax2.get_ylim()[1])
+
+    average_line = np.mean(group_counts.values, axis=1)
+
+    # Plot the average line
+    ax2.plot(x_pos, average_line, label='Average', color='black', linestyle='--', linewidth=2)
+
+
+    # Set the same y-axis limits for both axes
+    ax1.set_ylim(0, max_y)
+    ax2.set_ylim(0, max_y)
+
+    ax2.grid(False)
+
+    # Adding labels and title
+    ax1.set_xlabel('Periodo')
+    ax1.set_ylabel('Número de estudiantes')
+    plt.title('Estudiantes Únicos con Avance por Periodo', fontsize=18, fontweight='bold')
+    #plt.legend()
+    
+    plt.savefig(f'{directory_name}/students_groups_sin.png')
+
+
+
+def estudiantesUnicosConAvance_bar (original_path, desired_program, directory_name):
+
+    os.makedirs(directory_name, exist_ok=True)
+
+    cursos = load_cursos_obligatorios()
+
+    pensum_courses = list(cursos.keys())
+
+    xlsx = pd.read_excel(original_path)
+
+    mask = xlsx['Programa principal'] == desired_program
+
+    solo_IBIO = soloIBIO_df(xlsx, mask)
+
+    solo_IBIO, todosPeriodos = IBIO_columns(solo_IBIO, pensum_courses)
+
+    unique_df = solo_IBIO.groupby(['Código est', 'Periodo']).agg({'Avance': 'mean'}).reset_index()
+
+    unique_df['Group'] = unique_df['Avance'].apply(assign_group2)
+
+    period_counts = unique_df['Periodo'].value_counts().to_dict()
+
+    sorted_periods = sorted(period_counts.keys())
+    
+    sorted_period_counts = {period: period_counts[period] for period in sorted_periods}
+
+    group_counts = unique_df.groupby(['Periodo', 'Group']).size().unstack(fill_value=0)
+
+    group_colors = {
+    '>= +3': 'darkred',
+    '[+2, +3)': 'orangered',
+    '[+1, +2)': 'orange',
+    '[+0, +1)': 'gold',
+    '[-1, +0)': 'yellowgreen',
+    '[-2, -1)': 'green',
+    '<= -2': 'darkgreen',
+
+}
+    
+
+    plt.style.use('ggplot')
+
+    
+    mean_avance_per_year = unique_df.groupby('Periodo')['Avance'].mean()
+
+    '''fig, ax2 = plt.subplots(figsize=(14, 8))
+
+
+    x_pos = [i for i, _ in enumerate(todosPeriodos)]
+
+
+    ax2.bar([i - 0.0 for i in x_pos], sorted_period_counts.values(), color="cornflowerblue", width=0.38)
+    ax2.set_xticks(x_pos)
+    ax2.set_xticklabels(todosPeriodos)
+
+
+    bottom = np.zeros(len(sorted_periods))
+
+    for period in sorted_periods:
+
+
+        period_group_counts = group_counts.loc[period].sort_values(ascending=False)
+
+        # Define the order of colors based on your specified order
+
+        color_order = ['darkgreen', 'green', 'yellowgreen', 'gold', 'orange', 'orangered', 'darkred']
+
+        # Iterate over colors in the specified order
+        for color in color_order:
+
+
+            for group, count in period_group_counts.items():
+
+                if group_colors.get(group) == color:  # Check if the color matches the current one in the order
+                    ax2.bar(x_pos[sorted_periods.index(period)], count, bottom=bottom[sorted_periods.index(period)], label=group, color=color, width=0.42)
+                    bottom[sorted_periods.index(period)] += count
+                    break  # Break once the bar is plotted with the correct color to avoid plotting duplicates
+
+    max_y = max(ax2.get_ylim()[1], ax2.get_ylim()[1])
+    ax2.grid(True)
+    # Plot the average line
+
+    ax3 = ax2.twinx()
+    ax3.plot(x_pos, mean_avance_per_year.tolist(), label='Average', color='black', linestyle='--', marker='o' , linewidth=2)
+    ax3.set_ylabel('Avance promedio')
+    ax3.set_ylim(0,2.18)
+    ax2.set_ylim(0,435)
+    ax3.grid(False)
+
+    # Adding labels and title
+    ax2.set_xlabel('Periodo')
+    ax2.set_ylabel('Número de estudiantes')
+    plt.title('Estudiantes Únicos con Avance por Periodo', fontsize=18, fontweight='bold')
+    #plt.legend()
+    
+    plt.savefig(f'{directory_name}/students_groups_bar.png')'''
+
+    print(1)
+
+
+    fig, ax2 = plt.subplots(figsize=(14, 8))
+
+    factor = sum(period_counts.values())
+
+    x_pos = [i for i, _ in enumerate(todosPeriodos)]
+
+
+    #ax2.bar([i - 0.0 for i in x_pos], sorted_period_counts.values(), color="cornflowerblue", width=0.38)
+    ax2.set_xticks(x_pos)
+    ax2.set_xticklabels(todosPeriodos)
+
+
+    bottom = np.zeros(len(sorted_periods))
+
+    for period in sorted_periods:
+        period_group_counts = group_counts.loc[period].sort_values(ascending=False)
+
+        # Define the order of colors based on your specified order
+        color_order = ['darkgreen', 'green', 'yellowgreen', 'gold', 'orange', 'orangered', 'darkred']
+
+        total_height = sum(period_group_counts)
+   
+        # Iterate over colors in the specified order
+        for color in color_order:
+            for group, count in period_group_counts.items():
+                if group_colors.get(group) == color:  # Check if the color matches the current one in the order
+ 
+                    normalized_height = (count / total_height)*100
+                    
+                    ax2.bar(x_pos[sorted_periods.index(period)], normalized_height, 
+                            bottom=bottom[sorted_periods.index(period)], label=group, 
+                            color=color, width=0.42)
+                    bottom[sorted_periods.index(period)] += normalized_height
+                    break  # Break once the bar is plotted with the correct color to avoid plotting duplicates
+
+
+    max_y = max(ax2.get_ylim()[1], ax2.get_ylim()[1])
+    ax2.grid(True)
+    # Plot the average line
+
+    ax3 = ax2.twinx()
+    ax3.plot(x_pos, mean_avance_per_year.tolist(), label='Average', color='black', linestyle='--', marker='o' , linewidth=2)
+    ax3.set_ylabel('Avance promedio')
+    ax3.set_ylim(0,2.75)
+    ax2.set_ylim(0,100*(1.1))
+    ax3.grid(False)
+
+    # Adding labels and title
+    ax2.set_xlabel('Periodo')
+    ax2.set_ylabel('Número de estudiantes')
+    plt.title('Estudiantes Únicos con Avance por Periodo', fontsize=18, fontweight='bold')
+    #plt.legend()
+    
+    plt.savefig(f'{directory_name}/students_groups_bar_norm2.png')
+
+
+# Escriba el periodo actual o el periodo hasta el cual quiere calcular las estadísticas. Ej: "201810"
+periodo_actual = "202410"
+# Escriba el programa principal para el cual quiere calcular las estadísticas. Ej: "INGENIERIA BIOMEDICA"
+programa_principal = "INGENIERIA BIOMEDICA"
+# Ruta al archivo de datos de los cursos
+#cursos_excelPath = f"Data/Cursos IBIO 2018-{periodo_actual}.xlsx"
+cursos_excelPath = f"Data/Cursos Unicos 2018-{periodo_actual}.xlsx"
+# Ruta al archivo de datos de los estudiantes
+estudiantes_excelPath = f"Data/Estudiantes IBIO 201810-{periodo_actual}.xlsx"
+# Ruta al archivo de datos de los sancionados
+sancionados_excelPath = "Data/Estudiantes Sancionados 2021-10.xlsx"
+# Ruta al archivo de datos de los estudiantes que se retiraron
+path_retiros = "Data/Retiros 2018-10 a 202320.xlsx"
+
+directory_name = f'prueba'  
+
+estudiantesUnicosConAvance_bar(cursos_excelPath, programa_principal, directory_name)

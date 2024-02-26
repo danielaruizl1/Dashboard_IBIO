@@ -21,6 +21,23 @@ def assign_group(value):
         return '-3'
     else:
         return '< -3'
+    
+
+def assign_group2(value):
+    if value >= 3:
+        return '>= +3'
+    elif 2 <= value < 3:
+        return '[+2, +3)'
+    elif 1 <= value < 2:
+        return '[+1, +2)'
+    elif 0 <= value < 1:
+        return '[+0, +1)'
+    elif -1 < value < 0:
+        return '[-1, +0)'
+    elif -2 < value <= -1:
+        return '[-2, -1)'
+    elif value <= -2:
+        return '<= -2'
 
 def Semestre(row):
 
