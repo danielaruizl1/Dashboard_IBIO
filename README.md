@@ -168,4 +168,9 @@ Esta celda permite obtener estadísticas sobre los estudiantes sancionados en 20
 
 #### Celda 9: _Gráficas Generales_
 
-Esta celda permite obtener graficas que resumen las principales estadisticas encontradas y evaluar tendencias a lo largo del tiempo para tomar decisiones informadas. Entre estas gráficas se encuentran
+Esta celda genera gráficos que resumen las principales estadísticas encontradas, permitiendo evaluar tendencias a lo largo del tiempo para tomar decisiones informadas. Entre estos gráficos se incluyen la evolución del número de estudiantes en IBIO (a la izquierda) y el número total de estudiantes de IBIO, considerando el avance en las materias que han tenido a lo largo de los semestres.
+<p align="center">
+<img width="1047" alt="Screenshot 2024-08-23 at 09 36 45" src="https://github.com/user-attachments/assets/a656b679-6785-4d46-8967-376760aeb678">
+</p>
+
+
