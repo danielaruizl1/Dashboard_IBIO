@@ -43,4 +43,11 @@ git clone https://github.com/danielaruizl1/Dashboard_IBIO.git
 En la carpeta _**Data**_ se encuentran diferentes archivos que permitirán construir las diferentes gráficas del Dashboard IBIO.
 
   - **Cursos IBIO 2018 - 202410.xlsx:** Contiene la información de todos los estudiantes inscritos a cada uno de los cursos desde 2018-10 hasta 2024-10.
-  - 
+
+
+### Jupyter Notebook
+
+El archivo [run.ipynb](https://github.com/danielaruizl1/Dashboard_IBIO/blob/main/run.ipynb) contiene varias celdas ejecutables, cada una diseñada para generar un conjunto distinto de gráficas. Es importante ejecutar las celdas en el **orden indicado**, haciendo clic en el botón con el símbolo _play_.
+<p align="center">
+<img width="400" alt="Screenshot 2024-08-22 at 20 58 09" src="https://github.com/user-attachments/assets/d09b9ed4-a1a5-44f8-80c6-04ae5c9c868f">
+</p>
