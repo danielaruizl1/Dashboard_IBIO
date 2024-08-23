@@ -42,7 +42,10 @@ git clone https://github.com/danielaruizl1/Dashboard_IBIO.git
 
 En la carpeta _**Data**_ se encuentran diferentes archivos que permitirán construir las diferentes gráficas del Dashboard IBIO.
 
-  - **Cursos IBIO 2018 - 202410.xlsx:** Contiene la información de todos los estudiantes inscritos a cada uno de los cursos desde 2018-10 hasta 2024-10.
+  - **Cursos Unicos 2018-202410.xlsx:** Contiene la información de todos los estudiantes inscritos a cada uno de los cursos desde 2018-10 hasta 2024-10.
+  - **Estudiantes IBIO 201810-202410.xlsx:**
+  - **Estudiantes Sancionados 2021-10.xlsx:**
+  - **Retiros 2018-10 a 202320.xlsx:**
 
 
 ### Jupyter Notebook
@@ -51,3 +54,13 @@ El archivo [run.ipynb](https://github.com/danielaruizl1/Dashboard_IBIO/blob/main
 <p align="center">
 <img width="400" alt="Screenshot 2024-08-22 at 20 58 09" src="https://github.com/user-attachments/assets/d09b9ed4-a1a5-44f8-80c6-04ae5c9c868f">
 </p>
+
+#### Celda 1: _Definición de Rutas y Variables Importantes_
+Esta celda contiene las rutas de los archivos y algunas variables esenciales (como el período actual y el programa principal) necesarias para graficar los datos.
+
+#### Celda 2: _PieCharts por Materia para cada Periodo_
+
+Esta celda permite generar pie-charts por materia, mostrando el avance de cada estudiante en cada período. Es crucial especificar la ruta donde se desea guardar estos resultados antes de ejecutar la celda.
+```
+directory_name = f'RESULTS_{periodo_actual}/PieCharts_por_Materia'
+```
