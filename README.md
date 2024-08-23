@@ -34,10 +34,25 @@ El Dashboard IBIO está diseñado para monitorear el progreso académico de cada
 
 ## Ejecución
 
+### Repositorio
 Primero, es necesario clonar este repositorio en tu máquina local:
 ```
 git clone https://github.com/danielaruizl1/Dashboard_IBIO.git
 ```
+
+### Entorno virtual
+Para ejecutar el código del repositorio es necesario crear un entorno de python de la siguiente manera:
+```
+conda create -n dashboard
+conda activate dashboard
+conda install python
+pip install pandas
+pip install matplotlib
+pip install tqdm
+pip install openpyxl
+
+```
+
 ### Datos 
 
 En la carpeta _**Data**_ se encuentran diferentes archivos que permitirán construir las diferentes gráficas del Dashboard IBIO.
