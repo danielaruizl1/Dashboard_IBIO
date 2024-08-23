@@ -34,6 +34,15 @@ El Dashboard IBIO está diseñado para monitorear el progreso académico de cada
 
 ## Ejecución
 
+### Instalaciones
+
+Instalar [python](https://www.python.org/downloads/) (versión 3.11 funciona bien) 
+
+Instalar [Visual Studio Code](https://code.visualstudio.com/download) (VsCode)
+
+Crear cuenta en [Github](https://github.com/) 
+
+
 ### Repositorio
 Primero, es necesario clonar este repositorio en tu máquina local:
 ```
