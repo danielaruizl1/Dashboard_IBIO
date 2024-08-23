@@ -91,3 +91,18 @@ En este caso particular, se creará una carpeta llamada PieCharts_por_Materia qu
 ├── 20232
 └── 20241
 ```
+
+Los gráficos de pastel obtenidos se visualizarán de la siguiente manera. Es crucial tener en cuenta la escala de colores que indica el avance de los estudiantes: un mayor predominio de rojo representa un menor avance, mientras que el verde indica un mayor progreso.
+
+<p align="center"><img width="825" alt="Screenshot 2024-08-22 at 21 25 47" src="https://github.com/user-attachments/assets/3caff559-d7e3-4386-adef-1f5c129cd04f">
+
+</p>
+
+#### Celda 3: _PieCharts por Cohorte_
+
+Esta celda permite generar pie charts por cohorte, calculando el avance de cada generación de estudiantes que ingresaron al programa de Ingeniería Biomédica. Al igual que en otros casos, es fundamental especificar la ruta donde se desean guardar estos resultados antes de ejecutar la celda.
+
+En este caso, se creará una carpeta para cada periodo (2018-10 hasta 2024-10) donde se encontrarán los piecharts para cada una de las cohortes.
+<p align="center">
+<img width="840" alt="Screenshot 2024-08-22 at 21 33 48" src="https://github.com/user-attachments/assets/2054b7db-ffd2-4b57-a9bf-ed666f174142">
+</p>
