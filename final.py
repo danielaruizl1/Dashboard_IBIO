@@ -1050,3 +1050,17 @@ def PoblacionEstudiantesUnicos(xlsx, directory_name):
     plt.tight_layout()
 
     plt.savefig(f'{directory_name}/poblacionIBIO.png')
+
+    # Estudiantes únicos totales por periodo
+    plt.figure(figsize=(10, 6))
+    plt.bar(indices, df['Total Estudiantes IBIO'], width=bar_width, label='Estudiantes IBIO', color='#6495ED')
+    plt.bar(indices+bar_width, df['Total Estudiantes'], width=bar_width, label='Estudiantes totales', color='#92D050')
+    plt.xticks(indices, df['Periodo'].astype(str))
+    plt.xlabel('Periodo')
+    plt.ylabel('Número de Estudiantes')
+
+    plt.title('Estudiantes Unicos Totales por Periodo', fontsize=18, fontweight='bold')
+    plt.legend()
+    plt.tight_layout()
+
+    plt.savefig(f'{directory_name}/EstudiantesTotales_EstudiantesIBIO.png')
