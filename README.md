@@ -168,4 +168,4 @@ Esta celda permite obtener estadísticas sobre los estudiantes sancionados en 20
 
 #### Celda 9: _Gráficas Generales_
 
-Esta celda permite obtener graficas que resumen las principales estadisticas encontradas y evaluar tendencias a lo largo del tiempo para tomar decisiones informadas. Entre estas gráficas se encuentran
+Esta celda permite obtener graficas que resumen las principales estadisticas encontradas y evaluar tendencias a lo largo del tiempo para tomar decisiones informadas. 
