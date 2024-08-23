@@ -32,4 +32,15 @@ El Dashboard IBIO está diseñado para monitorear el progreso académico de cada
 </p>
 
 
-Para acceder a la carpeta de resultados, hacer click [aquí](https://uniandes-my.sharepoint.com/:f:/r/personal/j_puentes_uniandes_edu_co/Documents/Results%20Dashboard?csf=1&web=1&e=zB3xfo)
+## Ejecución
+
+Primero, es necesario clonar este repositorio en tu máquina local:
+```
+git clone https://github.com/danielaruizl1/Dashboard_IBIO.git
+```
+### Datos 
+
+En la carpeta _**Data**_ se encuentran diferentes archivos que permitirán construir las diferentes gráficas del Dashboard IBIO.
+
+  - **Cursos IBIO 2018 - 202410.xlsx:** Contiene la información de todos los estudiantes inscritos a cada uno de los cursos desde 2018-10 hasta 2024-10.
+  - 
