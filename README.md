@@ -55,6 +55,13 @@ El archivo [run.ipynb](https://github.com/danielaruizl1/Dashboard_IBIO/blob/main
 <img width="400" alt="Screenshot 2024-08-22 at 20 58 09" src="https://github.com/user-attachments/assets/d09b9ed4-a1a5-44f8-80c6-04ae5c9c868f">
 </p>
 
+
+Una vez que cada celda se ejecute correctamente, al finalizar la ejecución, se observará el siguiente símbolo:
+<p align="center">
+<img width="300" alt="Screenshot 2024-08-22 at 21 16 40" src="https://github.com/user-attachments/assets/c5d44a34-9868-470b-85c0-69ab92ec5b02">
+</p>
+
+
 #### Celda 1: _Definición de Rutas y Variables Importantes_
 Esta celda contiene las rutas de los archivos y algunas variables esenciales (como el período actual y el programa principal) necesarias para graficar los datos.
 
@@ -63,4 +70,24 @@ Esta celda contiene las rutas de los archivos y algunas variables esenciales (co
 Esta celda permite generar pie-charts por materia, mostrando el avance de cada estudiante en cada período. Es crucial especificar la ruta donde se desea guardar estos resultados antes de ejecutar la celda.
 ```
 directory_name = f'RESULTS_{periodo_actual}/PieCharts_por_Materia'
+```
+En este caso particular, se creará una carpeta llamada PieCharts_por_Materia que contendrá subcarpetas para cada período. Dentro de cada subcarpeta, habrá carpetas correspondientes a todas las materias del plan de estudios de IBIO, y en su interior se encontrará la imagen del piechart correspondiente.
+
+```
+.
+├── 20181
+│   ├── Biomateriales
+│   │   └── piechart_IBIO-2650.png
+│   ├── Biomecánica
+│   .
+│   .
+│   .
+│   ├── Proc. Señales e Inst. Biomédica
+│   ├── Proyecto de Diseño 1
+│   └── Proyecto de Diseño 2
+.
+.
+.
+├── 20232
+└── 20241
 ```
