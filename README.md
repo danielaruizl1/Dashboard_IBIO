@@ -106,3 +106,17 @@ En este caso, se creará una carpeta para cada periodo (2018-10 hasta 2024-10) d
 <p align="center">
 <img width="840" alt="Screenshot 2024-08-22 at 21 33 48" src="https://github.com/user-attachments/assets/2054b7db-ffd2-4b57-a9bf-ed666f174142">
 </p>
+
+#### Celda 4: _Estadísticas históricas por semestre_
+Esta celda genera gráficos que muestran el avance de cada cohorte en comparación con el promedio histórico. Esto permite evaluar el progreso de los estudiantes que ingresaron en un semestre particular en relación con todos los estudiantes del programa IBIO. La celda produce gráficos para cada uno de los períodos (desde 2018-10 hasta 2024-10) y un gráfico general que incluye las líneas de todas las cohortes, facilitando un análisis comparativo más directo.
+
+<p align="center">
+<img width="1391" alt="Screenshot 2024-08-22 at 21 40 49" src="https://github.com/user-attachments/assets/d7938b54-dd67-41af-93f4-c515ab6e3273">
+</p>
+
+#### Celda 5: _Número de estudiantes por Cohorte_
+
+Al igual que la celda 4, esta celda permite generar gráficos que muestran la evolución del número de estudiantes de cada cohorte a lo largo del tiempo. La celda produce gráficos específicos para cada cohorte (desde 2018-10 hasta 2024-10) y un gráfico general que incluye la evolución del número de estudiantes para todas las cohortes, proporcionando una visión integral del cambio en la matrícula a través del tiempo.
+<p align="center">
+<img width="1390" alt="Screenshot 2024-08-22 at 21 44 43" src="https://github.com/user-attachments/assets/e43a6543-f135-467b-b033-b93d024856ec">
+</p>
