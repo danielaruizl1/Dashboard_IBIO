@@ -42,10 +42,10 @@ git clone https://github.com/danielaruizl1/Dashboard_IBIO.git
 
 En la carpeta _**Data**_ se encuentran diferentes archivos que permitirán construir las diferentes gráficas del Dashboard IBIO.
 
-  - **Cursos Unicos 2018-202410.xlsx:** Contiene la información de todos los estudiantes inscritos a cada uno de los cursos desde 2018-10 hasta 2024-10.
-  - **Estudiantes IBIO 201810-202410.xlsx:**
-  - **Estudiantes Sancionados 2021-10.xlsx:**
-  - **Retiros 2018-10 a 202320.xlsx:**
+  - **Cursos Unicos 2018-202410.xlsx:** Contiene la información de todos los cursos desde 2018-10 hasta 2024-10.
+  - **Estudiantes IBIO 201810-202410.xlsx:** Contiene la información de todos estudiantes desde 2018-10 hasta 2024-10.
+  - **Estudiantes Sancionados 2021-10.xlsx:** Contiene la información de los estudiantes sancionados en 2021-10.
+  - **Retiros 2018-10 a 202320.xlsx:** Contiene la información histórica de todos los retiros desde 2018-10 hasta 2024-10.
 
 
 ### Jupyter Notebook
@@ -120,3 +120,28 @@ Al igual que la celda 4, esta celda permite generar gráficos que muestran la ev
 <p align="center">
 <img width="1390" alt="Screenshot 2024-08-22 at 21 44 43" src="https://github.com/user-attachments/assets/e43a6543-f135-467b-b033-b93d024856ec">
 </p>
+
+
+#### Celda 6: _Avance conjunto con número de estudiantes_
+Esta celda genera gráficos combinados que describen tanto el número de estudiantes (en azul claro) como el avance de cada materia (rojo), así como el avance promedio de las materias de ese mismo nivel (negro). Además, el gráfico de la derecha muestra el avance promedio junto con los valores de la desviación estándar.
+<p align="center">
+<img width="1227" alt="Screenshot 2024-08-22 at 21 51 54" src="https://github.com/user-attachments/assets/7079522b-2266-4a1a-8ed7-829ebdecbd7c">
+</p>
+
+#### Celda 7: _Retiros_
+Esta celda permite generar gráficos similares a los obtenidos en la celda 6, pero que incorporan información sobre la cantidad de estudiantes que retiraron cada materia en cada semestre. Esto facilita un análisis temporal de los retiros mientras se examina el avance académico.
+<p align="center">
+<img width="1347" alt="Screenshot 2024-08-22 at 21 55 56" src="https://github.com/user-attachments/assets/f796307a-2263-479e-a312-c6669a055c72">
+</p>
+
+
+#### Celda 8: _Sancionados_
+
+Esta celda permite obtener estadísticas sobre los estudiantes sancionados en 2021-1. Entre los gráficos generados se incluyen el avance de estos estudiantes a lo largo de los semestres y la evolución en su número.
+<p align="center">
+<img width="826" alt="Screenshot 2024-08-22 at 21 58 32" src="https://github.com/user-attachments/assets/f86a2375-9dd6-40f8-b8a0-a23eaf101b4d">
+</p>
+
+#### Celda 9: _Gráficas Generales_
+
+Esta celda permite obtener graficas que resumen las principales estadisticas encontradas y evaluar tendencias a lo largo del tiempo para tomar decisiones informadas. Entre estas gráficas se encuentran
