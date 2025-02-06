@@ -10,6 +10,7 @@ from plots import piecharts_por_materia, std_dev_plot, comparacionNivelPlot, gra
 from tqdm import tqdm
 import warnings
 import openpyxl
+import math
 
 # Ignorar todos los RuntimeWarning
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -217,7 +218,7 @@ def Retiros (path, original_path, desired_program, directory_name):
         retiros_count[materia] = {}
         
         materia_data = filtered_df[filtered_df['Materia'] == materia]
-        materia_data['Periodo'] = materia_data['Periodo'].astype(str)
+        materia_data.loc[:, 'Periodo'] = materia_data['Periodo'].astype(str)
 
         periodos_counts = materia_data['Periodo'].value_counts().items()
         
@@ -633,17 +634,19 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
     if not os.path.exists(directory):
         os.makedirs(directory)
     
+    max_avance=0
     for periodo in todosPeriodos:
         plt.figure(figsize=(10,7.5))
         plt.style.use('ggplot')
         lim=sum([not np.isnan(mean_dataframe.loc[periodo][x]) for x in range(len(todosPeriodos))])
         x_list=range(1,lim+1)
         y_list=mean_dataframe.loc[periodo][:lim]
+        max_avance=max(max_avance,max(y_list))
         y_err=desv_dataframe.loc[periodo][:lim]
         plt.plot(x_list, mean_avance_hist[:lim], 'o--', color='black', linewidth=0.8, label="Avance promedio histórico")
         plt.axhline(y=0, color="black", linewidth=0.8, linestyle='--')
         plt.errorbar(x_list, y_list, yerr=y_err, color='red', linewidth=0.8, fmt='o--', ecolor='black', label="Avance cohorte")
-        plt.ylim((-1,8))
+        plt.ylim((-1,math.ceil(max_avance)))
         plt.xticks(x_list)
         plt.xlabel('Semestre',fontsize=14)
         plt.ylabel('Avance Promedio',fontsize=14)
@@ -661,14 +664,16 @@ def plot_historico_cohortes(xlsx_cursos, xlsx_sancionados, mean_dataframe, desv_
     colors_list=list(mcolors.CSS4_COLORS.keys())
     dark_colors = [color for color in colors_list if "dark" in color]
 
+    max_avance=0
     for i in range(len(todosPeriodos)):
         lim=sum([not np.isnan(mean_dataframe.loc[todosPeriodos[i]][x]) for x in range(len(todosPeriodos))])
         x_list=range(1,lim+1)
         y_list=mean_dataframe.loc[todosPeriodos[i]][:lim]
         plt.plot(x_list, y_list, 'o--', linewidth=0.8, label=todosPeriodos[i], color=dark_colors[i])
         plt.axhline(y=0, color="black", linewidth=0.8, linestyle='--')
-        plt.ylim((-1,8))
-
+        max_avance=max(max_avance, max(y_list))
+     
+    plt.ylim((-1,math.ceil(max_avance)))
     plt.xlabel('Semestre',fontsize=14)
     plt.ylabel('Avance Promedio',fontsize=14)
     plt.legend(fontsize=12, loc=2)
@@ -1060,3 +1065,25 @@ def PoblacionEstudiantesUnicos(xlsx, directory_name):
     plt.tight_layout()
 
     plt.savefig(f'{directory_name}/EstudiantesTotales_EstudiantesIBIO.png')
+
+if __name__ == '__main__':
+
+    # Escriba el periodo actual o el periodo hasta el cual quiere calcular las estadísticas. Ej: "201810"
+    periodo_actual = "202510"
+    # Escriba el programa principal para el cual quiere calcular las estadísticas. Ej: "INGENIERIA BIOMEDICA"
+    programa_principal = "INGENIERIA BIOMEDICA"
+    # Ruta al archivo de datos de los cursos
+    cursos_excelPath = f"Data/Cursos 201810-{periodo_actual}.xlsx"
+    # Ruta al archivo de datos de los estudiantes
+    estudiantes_excelPath = f"Data/Estudiantes IBIO 201810-{periodo_actual}.xlsx"
+    # Ruta al archivo de datos de los sancionados
+    sancionados_excelPath = "Data/Estudiantes Sancionados 2021-10.xlsx"
+    # Ruta al archivo de datos de los estudiantes que se retiraron
+    path_retiros = "Data/Retiros 201810-202420.xlsx"
+    # Ruta al archivo de la población de estudiantes IBIO
+    poblacion_IBIO = "Data/EstudiantesUnicosTotales.xlsx"
+
+    directory_name = f"RESULTS_{periodo_actual}/Historico_cohortes"
+    mean_dataframe, desv_dataframe, results, mean_sancionados, desv_sancionados, sancionados_dict = avance_cohortes(cursos_excelPath, sancionados_excelPath, programa_principal)
+    mean_avance_hist = historico_cohortes(cursos_excelPath, sancionados_excelPath, programa_principal)
+    plot_historico_cohortes(cursos_excelPath, sancionados_excelPath, mean_dataframe, desv_dataframe, mean_avance_hist, directory_name, programa_principal)
