@@ -136,7 +136,7 @@ def retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_
     plt.xlabel('Semestre', fontsize=14)
     plt.ylabel('Número de estudiantes', fontsize=14)
     ax1.set_ylim([0,max_n+10])
-    ax1.text(1,93,f'{" Avance "}{pensum_courses[i]}{": "}{round(np.mean(y),3)}\n{" Avance Nivel "}{nivel_materia}{": "}{round(np.mean(y_nivel),3)}\n\n{" Estudiantes promedio: "}{round(np.mean(n_est),3)}', fontsize=10, ha='center', va='center',
+    ax1.text(1,85,f'{" Avance "}{pensum_courses[i]}{": "}{round(np.mean(y),3)}\n{" Avance Nivel "}{nivel_materia}{": "}{round(np.mean(y_nivel),3)}\n\n{" Estudiantes promedio: "}{round(np.mean(n_est),3)}', fontsize=10, ha='center', va='center',
             bbox=dict(boxstyle='square', facecolor='white', alpha=0.5))
     ax2 = ax1.twinx()
     ax2.plot(x_list,y,'--o', label=f'{pensum_courses[i]}',linewidth=0.8, color='red')

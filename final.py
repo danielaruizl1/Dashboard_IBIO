@@ -30,6 +30,7 @@ def soloIBIO_df (xlsx, mask):
 
 def IBIO_columns (solo_IBIO, pensum_courses):
 
+
     solo_IBIO['Periodo'] = solo_IBIO['Periodo'].astype(str).str[:5].astype(int)
     periodo = solo_IBIO["Periodo"]
     todosPeriodos = np.unique(periodo)
@@ -87,12 +88,6 @@ def mainMaterias(path, desired_program, directory_name):
 
             if not os.path.exists(directory2):
                 os.makedirs(directory2)
-
-
-            if todosPeriodos[i] == 20241:
-               
-               print("202410")
-              
 
             condition_materia = solo_IBIO['Materia']== pensum_courses[j]
 
@@ -201,6 +196,7 @@ def comparacionNivel (results_dict, max_n, media_min, media_max, directory_name)
 
 
 def Retiros (path, original_path, desired_program, directory_name):
+
 
     excel_retiros = pd.read_excel(path)
 
