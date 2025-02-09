@@ -618,8 +618,8 @@ def estudiantesUnicosConAvance (original_path, desired_program, directory_name):
     '[-1, +0)': 'yellowgreen',
     '[-2, -1)': 'green',
     '<= -2': 'darkgreen',
+    }
 
-}
 
     plt.style.use('ggplot')
     
@@ -745,7 +745,7 @@ def estudiantesUnicosPorPeriodo (original_path, desired_program, directory_name)
     plt.title('Estudiantes Únicos por Periodo', fontsize=18, fontweight='bold')
     
     plt.savefig(f'{directory_name}/estudiantes_unicos_por_periodo.png')
-
+    
     fig, ax2 = plt.subplots(figsize=(14, 8))
 
     x_pos = np.arange(len(todosPeriodos))
@@ -784,6 +784,8 @@ def estudiantesUnicosPorPeriodo (original_path, desired_program, directory_name)
     # Plot the average as area
     ax3 = ax2.twinx()
     ax3.fill_between(x_pos, 0, mean_avance_per_year.tolist(), label='Average', color='grey', alpha=0.5)
+    ax3.set_xticks(x_pos)
+    ax3.set_xticklabels(sorted_periods)
     ax3.set_ylabel('Avance promedio')
     ax3.set_ylim(0,2.75)
     ax2.set_ylim(0,100*(1.1))
@@ -792,6 +794,8 @@ def estudiantesUnicosPorPeriodo (original_path, desired_program, directory_name)
     # Plot the average line
     ax3 = ax2.twinx()
     ax3.plot(x_pos, mean_avance_per_year.tolist(), label='Average', color='black', linestyle='--', marker='o' , linewidth=2)
+    ax3.set_xticks(x_pos)
+    ax3.set_xticklabels(sorted_periods)
     ax3.set_ylabel('Avance promedio')
     ax3.set_ylim(0,2.75)
     ax2.set_ylim(0,100*(1.1))
@@ -799,7 +803,7 @@ def estudiantesUnicosPorPeriodo (original_path, desired_program, directory_name)
 
     # Adding labels and title
     ax2.set_xlabel('Periodo')
-    ax2.set_ylabel('Número de estudiantes')
+    ax2.set_ylabel('Porcentaje de estudiantes')
     plt.title('Estudiantes Únicos con Avance por Periodo', fontsize=18, fontweight='bold')
     #plt.legend()
     
@@ -995,7 +999,7 @@ def PoblacionEstudiantesUnicos(xlsx_cursos, desired_program, directory_name):
     # Añadir leyendas, títulos y etiquetas de ejes
     plt.xlabel('Periodo')
     plt.ylabel('Número de Estudiantes')
-    plt.title('Estudiantes Unicos por Periodo', fontsize=18, fontweight='bold')
+    plt.title('Estudiantes Únicos por Periodo', fontsize=18, fontweight='bold')
  
     # Ajustar layout y mostrar el plot
     plt.tight_layout()
@@ -1010,7 +1014,7 @@ def PoblacionEstudiantesUnicos(xlsx_cursos, desired_program, directory_name):
     plt.xlabel('Periodo')
     plt.ylabel('Número de Estudiantes')
 
-    plt.title('Estudiantes Unicos Totales por Periodo', fontsize=18, fontweight='bold')
+    plt.title('Estudiantes Únicos Totales por Periodo', fontsize=18, fontweight='bold')
     plt.legend()
     plt.tight_layout()
 
