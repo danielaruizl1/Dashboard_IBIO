@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
+import openpyxl
+import os
 
-def piecharts_por_materia (counts, cursos, pensum_courses, todosPeriodos, i, j,directory2):
+def piecharts_por_materia (counts, cursos, pensum_courses, todosPeriodos, i, j,directory2, avance_promedio):
 
     group_colors = {
         '> +3': '#d3554c',
@@ -21,17 +23,80 @@ def piecharts_por_materia (counts, cursos, pensum_courses, todosPeriodos, i, j,d
     explode_list = [explode] * len(counts)
     
     fig, ax = plt.subplots(figsize=(10, 10))
-    wedges, labels, _ = ax.pie(counts, colors =colors,autopct=lambda x: f'{int(round(x/100.0*sum(counts)))} ({x:.1f}%)', 
-                    textprops={'fontsize': 18}, explode = explode_list)
     ax.set_title(f'{cursos[pensum_courses[j]][1]}{" "}{todosPeriodos[i]}{0}', fontsize=24, fontweight='bold')
-    handles = [mpatches.Patch(color=color, label=label) for label, color in group_colors.items()]
-    legend = ax.legend(handles=handles, loc='upper right', prop={'size': 14})
-    for text in legend.get_texts():
-        text.set_fontsize(14)  
+    wedges, labels, _ = ax.pie(counts, colors =colors,autopct=lambda x: f'{int(round(x/100.0*sum(counts)))} ({x:.1f}%)', textprops={'fontsize': 18}, explode = explode_list)
+    #handles = [mpatches.Patch(color=color, label=label) for label, color in group_colors.items()]
+    #legend = ax.legend(title=f"Avance promedio: {avance_promedio}", loc='upper right', prop={'size': 14})
+    #for text in legend.get_texts():
+        #text.set_fontsize(14) 
+    ax.text(0.5, 0.98, f"Avance promedio: {avance_promedio:.2f}", 
+        transform=ax.transAxes, fontsize=16, 
+        verticalalignment='top', horizontalalignment='center')
     plt.savefig(f'{directory2}/piechart_{pensum_courses[j]}.png')
     plt.cla()
     plt.close()
 
+def plot_avance_cohortes(period, results, directory_name, avance_promedio):
+
+    group_colors_2 = {
+    '>3': '#d3554c',
+    '3-2': '#fc6c64',
+    '2-1': '#feb268',
+    '1-0': '#f7e16a',
+    '0-1': '#ffe9af',
+    '-1-2': '#d3e1a2',
+    '-2-3': '#a9e070',
+    }
+
+    # plot a 2 chart with the counts
+    for anio in results:
+
+        plt.figure(figsize=(10, 10))
+        plt.style.use('ggplot')
+        colors2 = [group_colors_2[group] for group in results[anio]]
+        plt.pie(results[anio].values(), autopct=lambda x: f'{int(round(x/100.0*sum(results[anio].values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':18}, explode=[0.05] * len(results[anio]))
+        plt.title(f'Avance de los estudiantes ingresados en {anio}\n para el periodo {period}', fontdict={'fontsize':22, 'weight': 'bold'})
+        #legend = plt.legend(results[anio].keys(), prop={'size': 14})
+        plt.text(0.5, 0.95, f"Avance promedio: {np.mean(avance_promedio[anio]):.2f}", fontsize=16, ha='center', va='bottom', transform=plt.gca().transAxes)
+        directory = f'{directory_name}/{period}'
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        plt.savefig(f'{directory}/piechart_{str(anio)}.png')
+        plt.cla()
+        plt.close()
+
+def plot_avance_all_cohortes(period, results, directory_name, avance_promedio):
+
+    group_colors_2 = {
+    '>3': '#d3554c',
+    '3-2': '#fc6c64',
+    '2-1': '#feb268',
+    '1-0': '#f7e16a',
+    '0-1': '#ffe9af',
+    '-1-2': '#d3e1a2',
+    '-2-3': '#a9e070',
+    }
+
+    all_cohortes = {">3":0,"3-2":0,"2-1":0,"1-0":0,"0-1":0,"-1-2":0,"-2-3":0}
+    for anio in results:
+        for key in results[anio]:
+            all_cohortes[key]+=results[anio][key]
+   
+    all_cohortes = {key: value for key, value in all_cohortes.items() if value != 0}
+    plt.figure(figsize=(10, 10))
+    plt.style.use('ggplot')
+    colors2 = [group_colors_2[group] for group in all_cohortes]
+    plt.pie(all_cohortes.values(), autopct=lambda x: f'{int(round(x/100.0*sum(all_cohortes.values())))}('+str(round(x,1))+"%)" ,colors=colors2,textprops={'fontsize':14}, explode=[0.05] * len(all_cohortes))
+    plt.title(f'Avance de todos los estudiantes en el periodo {period}', fontdict={'fontsize':22, 'weight': 'bold'})
+    #plt.legend(all_cohortes.keys())
+    plt.text(0.5, 0.95, f"Avance promedio: {avance_promedio:.2f}", 
+         fontsize=16, ha='center', va='bottom', transform=plt.gca().transAxes)
+    directory = f'{directory_name}/{period}'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    plt.savefig(f'{directory}/piechart_all_cohortes.png')
+    plt.cla()
+    plt.close()
 
 def std_dev_plot (results_dict, pensum_courses, min_value, max_mean, max_desv, cursos, i, directory_name):
     plt.style.use('ggplot')
@@ -106,8 +171,8 @@ def retiros_plot(y, x_list, n_est, result_list_retiros, max_n, pensum_courses, x
     ax1.text(1,93,f'{" Avance "}{pensum_courses[i]}{": "}{round(np.mean(y),3)}\n{" Avance Nivel "}{nivel_materia}{": "}{round(np.mean(y_nivel),3)}\n\n{" Estudiantes promedio: "}{round(np.mean(n_est),3)}', fontsize=10, ha='center', va='center',
             bbox=dict(boxstyle='square', facecolor='white', alpha=0.5))
     ax2 = ax1.twinx()
-    ax2.plot(x_list,y,'--o', label=f'{pensum_courses[i]}',linewidth=0.8, color='red')
-    plt.plot(x_nivel, y_nivel, '--o', label = f'{"Promedio Nivel "}{nivel_materia}' , linewidth=0.8, color='black')
+    ax2.plot(x_list,y,'--o', label=f'{pensum_courses[i]}',linewidth=1.5, color='red')
+    plt.plot(x_nivel, y_nivel, '--o', label = f'{"Promedio Nivel "}{nivel_materia}' , linewidth=1.5, color='black')
     ax2.grid(False)
     plt.ylabel('Avance promedio', fontsize=14)
     ax2.set_ylim([media_min-0.1,media_max+0.15])
@@ -139,8 +204,8 @@ def retiros_plot_resumido (y, x_list, n_est, result_list_retiros, max_n, pensum_
     ax1.text(1,85,f'{" Avance "}{pensum_courses[i]}{": "}{round(np.mean(y),3)}\n{" Avance Nivel "}{nivel_materia}{": "}{round(np.mean(y_nivel),3)}\n\n{" Estudiantes promedio: "}{round(np.mean(n_est),3)}', fontsize=10, ha='center', va='center',
             bbox=dict(boxstyle='square', facecolor='white', alpha=0.5))
     ax2 = ax1.twinx()
-    ax2.plot(x_list,y,'--o', label=f'{pensum_courses[i]}',linewidth=0.8, color='red')
-    plt.plot(x_nivel, y_nivel, '--o', label = f'{"Promedio Nivel "}{nivel_materia}' , linewidth=0.8, color='black')
+    ax2.plot(x_list,y,'--o', label=f'{pensum_courses[i]}',linewidth=1.5, color='red')
+    plt.plot(x_nivel, y_nivel, '--o', label = f'{"Promedio Nivel "}{nivel_materia}' , linewidth=1.5, color='black')
     ax2.grid(False)
     plt.ylabel('Avance promedio', fontsize=14)
     ax2.set_ylim([media_min-0.1,media_max+0.15])
@@ -163,12 +228,39 @@ def graficaSumaRetiros(semestres, sum_list, retiros_x, retiros_totales, result_l
     plt.xlabel('Semestre', fontsize=14)
     plt.ylabel('Número de estudiantes', fontsize=14)
     ax2 = ax1.twinx()
-    ax2.plot(semestres,result_list_avance,'--o', label='Avance general',linewidth=0.8, color='red')
+    ax2.plot(semestres,result_list_avance,'--o', label='Avance general',linewidth=2, color='red')
     ax2.grid(False)
     plt.ylabel('Avance promedio', fontsize=14)
     ax2.axhline(y=0, linestyle='dotted', color='blue')
-    plt.title('GRAFICA GENERAL POR PERIODOS', fontsize=20, fontdict={'fontweight': 'bold'})
+    plt.title('GRÁFICA GENERAL POR PERIODOS', fontsize=20, fontdict={'fontweight': 'bold'})
     plt.legend()
     plt.savefig(f'{directory}/Materias/grafica_general_por_periodos.png', bbox_inches='tight')
     plt.cla()
+    plt.close()
+
+def general_plots(xlsx_estudiantes, mean_avance_hist, mean_n_hist, directory_name):
+
+    estudiantes = openpyxl.load_workbook(xlsx_estudiantes)
+    semestres = estudiantes.sheetnames
+    n_semestres = list(range(len(semestres)))
+    
+    if not os.path.exists(directory_name):
+        os.makedirs(directory_name)
+
+    plt.style.use('ggplot')
+    fig, ax1 = plt.subplots(figsize=(10, 7))
+    ax1.bar(n_semestres, mean_n_hist, color="cornflowerblue", width=0.38, label='Estudiantes totales')
+    ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
+            fancybox=True, shadow=True, ncol=5)
+    plt.xlabel('Semestre')
+    plt.ylabel('Número de estudiantes')
+    ax2 = ax1.twinx()
+    ax2.plot(n_semestres, mean_avance_hist,'--o', label='Avance general',linewidth=2, color='red')
+    ax2.grid(False)
+    plt.ylabel('Avance promedio')
+    ax2.axhline(y=0, linestyle='dotted', color='blue')
+    plt.title('GRÁFICA GENERAL POR SEMESTRES', fontsize=18, fontweight='bold')
+    plt.legend()
+    plt.savefig(f'{directory_name}/grafica_general_semestre.png', bbox_inches='tight')
+    plt.cla()   
     plt.close()

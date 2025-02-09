@@ -144,8 +144,6 @@ def retirosPorMateria (pensum_courses, results_dict, medias_niveles, retiros_cou
     list_dict_retiros = []
     list_dict_avance = []
 
-    
-
     # Create an empty dictionary to store the sorted results
     sorted_results_dict = {}
 
